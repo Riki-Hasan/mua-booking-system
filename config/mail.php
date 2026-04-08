@@ -47,6 +47,14 @@ return [
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+            
+            'stream' => [
+                'ssl' => [
+                    'allow_self_signed' => true,
+                    'verify_peer' => env('APP_ENV') === 'production', // Hanya true jika sudah publish
+                    'verify_peer_name' => env('APP_ENV') === 'production',
+                ],
+            ],
         ],
 
         'ses' => [
@@ -96,6 +104,8 @@ return [
             ],
             'retry_after' => 60,
         ],
+
+
 
     ],
 

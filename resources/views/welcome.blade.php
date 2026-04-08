@@ -1,19 +1,146 @@
-@extends('layouts.app')
-
-@section('title', 'Halaman Uji Coba')
-
-@section('content')
-    <div class="bg-white p-10 rounded-3xl shadow-xl border border-pink-100 text-center max-w-2xl mx-auto">
-        <h1 class="text-4xl font-extrabold text-gray-900 mb-4">
-            Tailwind Berhasil Aktif! 🚀
-        </h1>
-        <p class="text-gray-600 mb-8">
-            Jika kamu melihat kotak ini dengan bayangan halus dan tombol berwarna pink di bawah, 
-            berarti konfigurasi manual Tailwind dan Vite kamu sudah benar.
-        </p>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dya's Makeup | MUA Professional Portfolio</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
         
-        <button class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-full transition-all shadow-lg shadow-pink-200">
-            Cek Portofolio
-        </button>
-    </div>
-@endsection
+        /* Background Pattern untuk Pricelist */
+        .bg-makeup-pattern {
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); /* Pattern halus */
+            background-color: #ffffff;
+        }
+        
+        /* Ilustrasi Alat Rias (Subtle) */
+        .makeup-illustration {
+            position: absolute;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="bg-[#FFF9F9] text-gray-900 selection:bg-pink-200">
+
+    <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[92%] max-w-4xl glass z-50 px-6 md:px-8 py-4 rounded-[2.5rem] flex justify-between items-center shadow-xl shadow-pink-100/50 border border-white">
+        <div class="text-xl md:text-2xl font-black italic tracking-tighter text-gray-900">MUA<span class="text-pink-500">.</span></div>
+        <div class="flex gap-4 md:gap-8 text-[10px] font-black uppercase tracking-widest text-gray-500">
+            <a href="#" class="hover:text-pink-500 transition-all">Home</a>
+            <a href="#pricelist" class="hover:text-pink-500 transition-all">Harga</a>
+            <a href="#portfolio" class="hover:text-pink-500 transition-all">Portfolio</a>
+            <a href="{{ route('login') }}" class="text-pink-600 bg-pink-50 px-3 py-1 rounded-full"><i class="fa-solid fa-user-lock"></i></a>
+        </div>
+    </nav>
+
+    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <div class="absolute top-20 -left-20 w-96 h-96 bg-pink-200/30 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-20 -right-20 w-96 h-96 bg-blue-100/30 rounded-full blur-[100px]"></div>
+        <div class="relative z-10 text-center px-6">
+            <h4 class="text-pink-500 font-black uppercase tracking-[0.4em] text-[9px] md:text-[10px] mb-4">Professional Makeup Artist</h4>
+            <h1 class="text-5xl md:text-8xl font-black text-gray-900 leading-[0.95] tracking-tighter italic mb-8">
+                Beauty is <br> <span class="text-transparent border-b-4 border-pink-500" style="-webkit-text-stroke: 1.5px #111;">An Art Form.</span>
+            </h1>
+            <p class="max-w-md mx-auto text-gray-500 text-xs md:text-sm leading-relaxed mb-10">
+                Menyempurnakan setiap momen berharga dengan riasan elegan, tahan lama, dan berkelas.
+            </p>
+            <a href="#pricelist" class="bg-gray-900 text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-[10px] md:text-xs hover:bg-pink-600 transition-all shadow-2xl shadow-pink-200 uppercase tracking-widest">
+                Booking Sekarang
+            </a>
+        </div>
+    </section>
+
+    <section id="pricelist" class="py-20 px-4 md:px-6 max-w-5xl mx-auto">
+        <div class="bg-white rounded-[3.5rem] p-8 md:p-20 shadow-2xl shadow-pink-100/50 border border-pink-50 relative overflow-hidden bg-makeup-pattern">
+            
+            <i class="fa-solid fa-brush makeup-illustration text-9xl -top-10 -left-10 rotate-45"></i>
+            <i class="fa-solid fa-eye-dropper makeup-illustration text-9xl -bottom-10 -right-10 -rotate-12"></i>
+            <i class="fa-solid fa-sparkles makeup-illustration text-8xl top-1/2 left-10"></i>
+
+            <div class="text-center mb-16 relative z-10">
+                <h4 class="text-pink-500 font-black uppercase tracking-[0.4em] text-[10px] mb-2 italic">Dya's Official Pricelist</h4>
+                <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-gray-900">Daftar Harga<span class="text-pink-500">.</span></h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 relative z-10">
+                @foreach($categories as $category)
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-[2rem] bg-pink-50/30 border border-pink-100/50 hover:bg-white hover:shadow-xl hover:shadow-pink-100/50 transition-all group">
+                    <div class="flex-1">
+                        <h3 class="text-base md:text-xl font-black text-gray-800 uppercase italic group-hover:text-pink-600 transition-colors leading-tight">{{ $category->name }}</h3>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                            <i class="fa-regular fa-clock mr-1"></i> {{ $category->duration_minutes }} Menit Durasi Kerja
+                        </p>
+                    </div>
+                    
+                    <div class="flex items-center justify-between md:justify-end gap-6">
+                        <div class="text-left md:text-right">
+                            <p class="text-[9px] font-black text-pink-400 uppercase tracking-[0.2em] mb-1">Mulai Dari</p>
+                            <span class="text-xl md:text-2xl font-black text-gray-900 italic tracking-tighter">Rp{{ number_format($category->base_price/1000, 0) }}k</span>
+                        </div>
+                        
+                        <a href="{{ route('booking.create', $category->id) }}" class="bg-gray-900 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-pink-600 active:scale-95 transition-all shadow-lg shadow-gray-200">
+                            Booking <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            
+            <div class="mt-16 text-center relative z-10">
+                <div class="inline-flex items-center gap-2 bg-pink-50 px-6 py-3 rounded-full">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                    </span>
+                    <p class="text-[9px] text-pink-600 font-black uppercase tracking-widest italic">Slot Terbatas - Pesan sekarang sebelum penuh!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="py-24 px-4 md:px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-20">
+            <h2 class="text-4xl md:text-6xl font-black italic tracking-tighter uppercase">Portfolio<span class="text-pink-500">.</span></h2>
+            <p class="text-gray-400 text-[10px] font-black uppercase mt-3 tracking-widest">Inspirasi riasan nyata untuk momen spesialmu</p>
+            <p class="text-gray-400 text-[10px] font-black uppercase mt-3 tracking-widest">Silahkan klik gambar untuk melihat detail dan booking</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            @foreach(\App\Models\Portfolio::with('category')->latest()->get() as $portfolio)
+                <div class="group relative bg-white rounded-[2rem] md:rounded-[3rem] p-2 md:p-3 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border border-pink-50">
+                    <div class="aspect-[4/5] rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden relative">
+                        <img src="{{ asset('storage/' . $portfolio->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 md:p-8">
+                            <div class="flex justify-between items-end mb-4 border-b border-white/20 pb-4">
+                                <div class="flex-1 pr-2">
+                                    <h3 class="text-white text-[10px] md:text-sm font-black uppercase italic tracking-tighter leading-tight">{{ $portfolio->category->name }}</h3>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-white text-sm md:text-xl font-black italic tracking-tighter">Rp{{ number_format($portfolio->category->base_price/1000, 0) }}k</span>
+                                </div>
+                            </div>
+                            
+                            <a href="{{ route('booking.create', $portfolio->category_id) }}" class="glass py-3 md:py-4 rounded-xl text-center text-[9px] md:text-[11px] font-black uppercase tracking-widest text-gray-900 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-calendar-check"></i> Booking Paket Ini
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
+    <footer class="py-20 text-center border-t border-pink-50">
+        <div class="text-3xl font-black italic mb-4">MUA<span class="text-pink-500">.</span></div>
+        <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest italic">Melayani Area Tegal - Brebes - Slawi</p>
+        <p class="mt-10 text-[9px] font-bold text-gray-300 uppercase tracking-widest">&copy; 2026 Crafted by Your Informatics Partner ✨</p>
+    </footer>
+
+</body>
+</html>

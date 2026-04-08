@@ -12,21 +12,24 @@ class MuaSeeder extends Seeder
      */
     public function run(): void
     {
-        // Data Wilayah & Ongkir
-        \App\Models\Location::create(['region_name' => 'Kota Tegal', 'additional_price' => 10000]);
-        \App\Models\Location::create(['region_name' => 'Kabupaten Tegal', 'additional_price' => 20000]);
-        \App\Models\Location::create(['region_name' => 'Kabupaten Brebes', 'additional_price' => 25000]);
+        // Akun Admin Utama
+        \App\Models\User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin MUA',
+                'password' => bcrypt('admin123'),
+            ]
+        );
 
-        // Data Paket & Durasi
-        \App\Models\Category::create([
-            'name' => 'Makeup Wisuda', 
-            'base_price' => 200000, 
-            'duration_minutes' => 120 // 2 Jam
-        ]);
-        \App\Models\Category::create([
-            'name' => 'Makeup Wedding', 
-            'base_price' => 1500000, 
-            'duration_minutes' => 240 // 4 Jam
+        // Data Wilayah
+        \App\Models\Location::firstOrCreate(['region_name' => 'Kota Tegal'], ['additional_price' => 10000]);
+        \App\Models\Location::firstOrCreate(['region_name' => 'Kabupaten Tegal'], ['additional_price' => 20000]);
+
+        // Data Paket (Default image kosong dulu agar kamu bisa upload via Admin)
+        \App\Models\Category::firstOrCreate(['name' => 'Makeup Wisuda'], [
+            'base_price' => 200000,
+            'duration_minutes' => 120,
+            'image' => 'portfolio/default.jpg'
         ]);
     }
 }

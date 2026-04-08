@@ -8,4 +8,10 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    server: { // Tambahkan blok server ini
+        host: '0.0.0.0',
+        hmr: {
+            host: 'mandy-unstoic-venessa.ngrok-free.dev', // Sesuaikan dengan link Ngrok kamu
+        },
+    },
 });
