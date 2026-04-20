@@ -7,6 +7,10 @@ use App\Models\Booking;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
+// tambahan
+use App\Mail\ScheduleReminder;
+use Illuminate\Support\Facades\Mail;
+
 class DashboardController extends Controller
 {
     public function index()
@@ -64,5 +68,28 @@ class DashboardController extends Controller
         $bookings = $query->get();
 
         return view('admin.schedules.monthly', compact('bookings', 'month', 'year', 'showPast'));
+    }
+
+
+    // test reminder
+    public function testReminder()
+    {
+        $admin = auth()->user();
+        $targetDate = Carbon::today()->addDays($admin->reminder_days)->toDateString();
+
+        // Masukkan status yang sah di sistem kamu
+        $bookings = \App\Models\Booking::where('booking_date', $targetDate)
+                        ->whereIn('status', ['success', 'paid_dp', 'confirmed', 'paid_full'])
+                        ->get();
+
+        if ($bookings->isEmpty()) {
+            return back()->with('error_delete', 'Tidak ada jadwal untuk H-' . $admin->reminder_days . ' (Tgl: ' . Carbon::parse($targetDate)->format('d/m/Y') . ')');
+        }
+
+        foreach ($bookings as $booking) {
+            \Illuminate\Support\Facades\Mail::to($admin->email)->send(new \App\Mail\ScheduleReminder($booking));
+        }
+
+        return back()->with('success_edit', 'Email pengingat berhasil dikirim ke ' . $admin->email);
     }
 }

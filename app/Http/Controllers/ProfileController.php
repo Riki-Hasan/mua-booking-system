@@ -57,4 +57,17 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'reminder_days' => 'required|integer|min:1|max:30',
+        ]);
+
+        $request->user()->update([
+            'reminder_days' => $request->reminder_days,
+        ]);
+
+        return back()->with('status', 'settings-updated');
+    }
 }

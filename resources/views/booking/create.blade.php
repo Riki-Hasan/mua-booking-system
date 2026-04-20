@@ -23,6 +23,10 @@
                             <input type="text" id="input_name" name="customer_name" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-pink-500 transition-all" required>
                         </div>
                         <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Jumlah Orang</label>
+                            <input type="number" name="person_count" id="input_persons" value="1" min="1" oninput="updateTotal()" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-pink-500 font-bold" required>
+                        </div>
+                        <div>
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Nomor WhatsApp</label>
                             <input type="number" id="input_wa" name="whatsapp_number" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-pink-500 transition-all" placeholder="08xxx" required>
                         </div>
@@ -91,7 +95,7 @@
 
     <script>
         // 1. PERSISTENSI DATA (Local Storage) - Agar data tidak hilang saat pindah page
-        const inputs = ['input_name', 'input_wa', 'input_address', 'location_select'];
+        const inputs = ['input_name', 'input_wa', 'input_address', 'location_select', 'input_persons'];
         
         // Simpan data setiap kali ada perubahan
         inputs.forEach(id => {
@@ -104,6 +108,7 @@
                 // Event listener untuk simpan otomatis
                 el.addEventListener('input', () => {
                     localStorage.setItem(id, el.value);
+                    if(id === 'input_persons') updateTotal();
                 });
             }
         });
@@ -126,8 +131,12 @@
         const basePrice = parseInt(document.getElementById('base_price_input').dataset.price);
         
         function updateTotal() {
-            const extra = parseInt(locationSelect.options[locationSelect.selectedIndex].getAttribute('data-extra'));
-            const total = basePrice + extra;
+            const extra = parseInt(locationSelect.options[locationSelect.selectedIndex].getAttribute('data-extra')) || 0;
+            const persons = parseInt(document.getElementById('input_persons').value) || 1;
+            
+            // RUMUS: (Harga Paket x Jumlah Orang) + Ongkir
+            const total = (basePrice * persons) + extra;
+            
             document.getElementById('display_extra').innerText = extra.toLocaleString('id-ID');
             document.getElementById('display_total').innerText = total.toLocaleString('id-ID');
         }

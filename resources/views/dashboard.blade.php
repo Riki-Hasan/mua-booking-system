@@ -1,22 +1,20 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-bold text-2xl text-pink-600 leading-tight">
+            <h2 class="font-bold text-2xl text-pink-600 leading-tight tracking-tighter">
                 {{ __('Admin Control Center') }}
             </h2>
-            <a href="{{ url('/') }}" target="_blank" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-pink-500 transition-all flex items-center gap-2">
-                <i class="fa fa-eye text-pink-400"></i> Lihat Beranda Client
-            </a>
         </div>
     </x-slot>
 
     <div class="py-12 bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
-            <div class="bg-white overflow-hidden shadow-sm rounded-3xl mb-8 border border-gray-100">
-                <div class="p-8 text-gray-900">
-                    <h1 class="text-2xl font-black italic">Selamat Datang, Admin! ✨</h1>
-                    <p class="text-gray-500 text-sm">Kelola bisnismu dengan satu genggaman.</p>
+            <div class="bg-white overflow-hidden shadow-sm rounded-[2.5rem] mb-8 border border-pink-50 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                <div class="p-8 md:p-10 text-gray-900 relative z-10">
+                    <h1 class="text-3xl font-black italic tracking-tighter uppercase">Halo, {{ explode(' ', Auth::user()->name)[0] }}! ✨</h1>
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Kelola bisnismu dengan satu genggaman modern.</p>
                 </div>
             </div>
 

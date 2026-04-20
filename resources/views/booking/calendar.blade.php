@@ -37,6 +37,14 @@
             75% { transform: translateX(10px); }
         }
         .animate-shake { animation: shake 0.4s ease-in-out; }
+
+        .holiday-active { 
+            background-color: #e11d48 !important; 
+            color: white !important; 
+            border: 4px solid #fff1f2 !important; 
+            box-shadow: 0 10px 15px -3px rgba(225, 29, 72, 0.4); 
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="bg-pink-50 min-h-screen p-3 md:p-6 font-sans">
@@ -200,7 +208,12 @@
                     if (availability[i].status === 'full') {
                         btn.className += "bg-rose-500 text-white";
                         btn.onclick = () => showInfo(i, 'full', availability[i].details);
-                    } else {
+                    } else if (availability[i].status === 'holiday') {
+                        btn.classList.add('holiday-active');
+                        btn.disabled = true; // MATIKAN KLIK UNTUK CUSTOMER
+                        btn.title = "Maaf, hari ini kami libur";
+                        btn.onclick = null;
+                    }else {
                         btn.className += "bg-amber-400 text-white";
                         btn.onclick = () => showInfo(i, 'partial', availability[i].details);
                     }

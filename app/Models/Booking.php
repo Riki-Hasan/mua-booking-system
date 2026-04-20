@@ -22,6 +22,7 @@ class Booking extends Model
         'dp_amount',
         'payment_proof',
         'status',
+        'person_count',
     ];
 
     /**

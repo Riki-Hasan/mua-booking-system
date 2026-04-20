@@ -74,6 +74,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     // Pastikan resource categories juga ada
     Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class);
     Route::delete('/portfolios/{id}', [App\Http\Controllers\Admin\CategoryController::class, 'destroyPortfolio'])->name('portfolios.destroy');
+    Route::patch('/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings.update');
+    Route::post('/schedules/toggle-holiday', [ScheduleController::class, 'toggleHoliday'])->name('schedules.toggle_holiday');
+    Route::get('/test-reminder', [DashboardController::class, 'testReminder'])->name('test.reminder');
+    //midtrans schedule
+    Route::post('/schedules/prepare-payment', [ScheduleController::class, 'preparePayment'])->name('schedules.prepare');
 });
 
 // Redirect Breeze Default Dashboard ke Admin Dashboard
@@ -116,4 +121,9 @@ Route::get('/test-midtrans', function() {
     if ($err) return "CURL Error: " . $err;
     return json_decode($response);
 });
+
+
+
+
+
 require __DIR__.'/auth.php';
