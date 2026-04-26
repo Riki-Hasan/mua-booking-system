@@ -3,144 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dya's Makeup | MUA Professional Portfolio</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <title>Dya's Makeup - Your Beauty, My Art</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
-        
-        /* Background Pattern untuk Pricelist */
-        .bg-makeup-pattern {
-            background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); /* Pattern halus */
-            background-color: #ffffff;
-        }
-        
-        /* Ilustrasi Alat Rias (Subtle) */
-        .makeup-illustration {
-            position: absolute;
-            opacity: 0.05;
-            pointer-events: none;
-            z-index: 0;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FDF7F5; scroll-behavior: smooth; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .swiper-slide { height: auto; }
     </style>
 </head>
-<body class="bg-[#FFF9F9] text-gray-900 selection:bg-pink-200">
+<body class="text-slate-800">
 
-    <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[92%] max-w-4xl glass z-50 px-6 md:px-8 py-4 rounded-[2.5rem] flex justify-between items-center shadow-xl shadow-pink-100/50 border border-white">
-        <div class="text-xl md:text-2xl font-black italic tracking-tighter text-gray-900">MUA<span class="text-pink-500">.</span></div>
-        <div class="flex gap-4 md:gap-8 text-[10px] font-black uppercase tracking-widest text-gray-500">
-            <a href="#" class="hover:text-pink-500 transition-all">Home</a>
-            <a href="#pricelist" class="hover:text-pink-500 transition-all">Harga</a>
-            <a href="#portfolio" class="hover:text-pink-500 transition-all">Portfolio</a>
-            <a href="{{ route('login') }}" class="text-pink-600 bg-pink-50 px-3 py-1 rounded-full"><i class="fa-solid fa-user-lock"></i></a>
+    <nav class="fixed w-full z-50 bg-white/70 backdrop-blur-lg border-b border-rose-50">
+        <div class="max-w-6xl mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-black text-rose-500 italic tracking-tighter">Dya's Makeup</h1>
+            <div class="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                <a href="#home" class="hover:text-rose-500 transition-colors">Home</a>
+                <a href="#portfolio" class="hover:text-rose-500 transition-colors">Portfolio</a>
+                <a href="#pricelist" class="hover:text-rose-500 transition-colors">Pricelist</a>
+                <a href="{{ route('login') }}" class="hover:text-rose-500"><i class="fa-solid fa-lock"></i></a>
+            </div>
+            <a href="#pricelist" class="bg-rose-500 text-white px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md hover:bg-rose-600">Book Now</a>
         </div>
     </nav>
 
-    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-        <div class="absolute top-20 -left-20 w-96 h-96 bg-pink-200/30 rounded-full blur-[100px]"></div>
-        <div class="absolute bottom-20 -right-20 w-96 h-96 bg-blue-100/30 rounded-full blur-[100px]"></div>
-        <div class="relative z-10 text-center px-6">
-            <h4 class="text-pink-500 font-black uppercase tracking-[0.4em] text-[9px] md:text-[10px] mb-4">Professional Makeup Artist</h4>
-            <h1 class="text-5xl md:text-8xl font-black text-gray-900 leading-[0.95] tracking-tighter italic mb-8">
-                Beauty is <br> <span class="text-transparent border-b-4 border-pink-500" style="-webkit-text-stroke: 1.5px #111;">An Art Form.</span>
-            </h1>
-            <p class="max-w-md mx-auto text-gray-500 text-xs md:text-sm leading-relaxed mb-10">
-                Menyempurnakan setiap momen berharga dengan riasan elegan, tahan lama, dan berkelas.
-            </p>
-            <a href="#pricelist" class="bg-gray-900 text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-[10px] md:text-xs hover:bg-pink-600 transition-all shadow-2xl shadow-pink-200 uppercase tracking-widest">
-                Booking Sekarang
-            </a>
-        </div>
-    </section>
-
-    <section id="pricelist" class="py-20 px-4 md:px-6 max-w-5xl mx-auto">
-        <div class="bg-white rounded-[3.5rem] p-8 md:p-20 shadow-2xl shadow-pink-100/50 border border-pink-50 relative overflow-hidden bg-makeup-pattern">
-            
-            <i class="fa-solid fa-brush makeup-illustration text-9xl -top-10 -left-10 rotate-45"></i>
-            <i class="fa-solid fa-eye-dropper makeup-illustration text-9xl -bottom-10 -right-10 -rotate-12"></i>
-            <i class="fa-solid fa-sparkles makeup-illustration text-8xl top-1/2 left-10"></i>
-
-            <div class="text-center mb-16 relative z-10">
-                <h4 class="text-pink-500 font-black uppercase tracking-[0.4em] text-[10px] mb-2 italic">Dya's Official Pricelist</h4>
-                <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-gray-900">Daftar Harga<span class="text-pink-500">.</span></h2>
+    <main class="max-w-6xl mx-auto px-6 pt-24 pb-12">
+        <section id="home" class="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
+            <div class="md:w-3/5 space-y-4 text-center md:text-left">
+                <h2 class="text-3xl md:text-5xl font-serif text-slate-900 leading-tight">
+                    Hi, I'm Dya! <br>
+                    <span class="text-rose-400 italic">Your Beauty, My Art.</span> <br>
+                    <span class="text-2xl md:text-3xl">Welcome to My Studio.</span>
+                </h2>
+                <p class="text-gray-500 text-xs md:text-sm max-w-sm">Sentuhan riasan profesional untuk memancarkan kecantikan alami Anda di setiap momen berharga.</p>
             </div>
+            
+            <div class="relative md:w-2/5 flex justify-end">
+                <div class="w-48 h-60 md:w-56 md:h-72 bg-rose-100 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-xl flex items-center justify-center">
+                    @php
+                        // Asumsi data diambil dari tabel users milik admin pertama
+                        $admin = \App\Models\User::first(); 
+                    @endphp
 
-            <div class="grid grid-cols-1 gap-6 relative z-10">
-                @foreach($categories as $category)
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-[2rem] bg-pink-50/30 border border-pink-100/50 hover:bg-white hover:shadow-xl hover:shadow-pink-100/50 transition-all group">
-                    <div class="flex-1">
-                        <h3 class="text-base md:text-xl font-black text-gray-800 uppercase italic group-hover:text-pink-600 transition-colors leading-tight">{{ $category->name }}</h3>
-                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
-                            <i class="fa-regular fa-clock mr-1"></i> {{ $category->duration_minutes }} Menit Durasi Kerja
-                        </p>
-                    </div>
+                    @if($admin && $admin->profile_photo_path)
+                        <img src="{{ asset('storage/' . $admin->profile_photo_path) }}" 
+                            alt="Dya Profile" 
+                            class="w-full h-full object-cover">
+                    @else
+                        <i class="fa-solid fa-user-tie text-7xl text-rose-200"></i>
+                    @endif
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- promo -->
+        <section class="mb-20">
+            <div class="swiper promoSwiper overflow-visible">
+                <div class="swiper-wrapper">
                     
-                    <div class="flex items-center justify-between md:justify-end gap-6">
-                        <div class="text-left md:text-right">
-                            <p class="text-[9px] font-black text-pink-400 uppercase tracking-[0.2em] mb-1">Mulai Dari</p>
-                            <span class="text-xl md:text-2xl font-black text-gray-900 italic tracking-tighter">Rp{{ number_format($category->base_price/1000, 0) }}k</span>
-                        </div>
-                        
-                        <a href="{{ route('booking.create', $category->id) }}" class="bg-gray-900 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-pink-600 active:scale-95 transition-all shadow-lg shadow-gray-200">
-                            Booking <i class="fa-solid fa-chevron-right ml-1"></i>
-                        </a>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            
-            <div class="mt-16 text-center relative z-10">
-                <div class="inline-flex items-center gap-2 bg-pink-50 px-6 py-3 rounded-full">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
-                    </span>
-                    <p class="text-[9px] text-pink-600 font-black uppercase tracking-widest italic">Slot Terbatas - Pesan sekarang sebelum penuh!</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="portfolio" class="py-24 px-4 md:px-6 max-w-7xl mx-auto">
-        <div class="text-center mb-20">
-            <h2 class="text-4xl md:text-6xl font-black italic tracking-tighter uppercase">Portfolio<span class="text-pink-500">.</span></h2>
-            <p class="text-gray-400 text-[10px] font-black uppercase mt-3 tracking-widest">Inspirasi riasan nyata untuk momen spesialmu</p>
-            <p class="text-gray-400 text-[10px] font-black uppercase mt-3 tracking-widest">Silahkan klik gambar untuk melihat detail dan booking</p>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-            @foreach(\App\Models\Portfolio::with('category')->latest()->get() as $portfolio)
-                <div class="group relative bg-white rounded-[2rem] md:rounded-[3rem] p-2 md:p-3 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border border-pink-50">
-                    <div class="aspect-[4/5] rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden relative">
-                        <img src="{{ asset('storage/' . $portfolio->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 md:p-8">
-                            <div class="flex justify-between items-end mb-4 border-b border-white/20 pb-4">
-                                <div class="flex-1 pr-2">
-                                    <h3 class="text-white text-[10px] md:text-sm font-black uppercase italic tracking-tighter leading-tight">{{ $portfolio->category->name }}</h3>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-white text-sm md:text-xl font-black italic tracking-tighter">Rp{{ number_format($portfolio->category->base_price/1000, 0) }}k</span>
+                    @foreach($bundlings as $index => $promo)
+                    <div class="swiper-slide w-full md:w-[580px] h-full">
+                        <div class="{{ $index % 2 == 0 ? 'bg-slate-900' : 'bg-rose-400' }} rounded-[2.5rem] p-8 text-white flex flex-row items-center gap-6 relative overflow-hidden h-[280px]">
+                            
+                            <div class="flex-1 z-10">
+                                <span class="text-[8px] font-black {{ $index % 2 == 0 ? 'bg-rose-500' : 'bg-white/20' }} px-3 py-1 rounded-md uppercase tracking-widest">
+                                    {{ $promo->title }}
+                                </span>
+                                
+                                <h4 class="text-2xl font-black italic mt-3 uppercase leading-tight">
+                                    {!! nl2br(e($promo->subject)) !!}
+                                </h4>
+                                
+                                <p class="text-[10px] {{ $index % 2 == 0 ? 'text-gray-400' : 'text-rose-100' }} mt-2 font-bold italic">
+                                    {{ $promo->short_description }}
+                                </p>
+                                
+                                <div class="mt-6 flex items-center gap-4">
+                                    <div class="text-2xl font-black {{ $index % 2 == 0 ? 'text-rose-400' : 'text-slate-900' }} italic tracking-tighter">
+                                        Rp{{ number_format($promo->price/1000, 0) }}k
+                                    </div>
+                                    
+                                    <button onclick="openPromoDetail('{{ $promo->id }}', '{{ $promo->subject }}', '{{ $promo->short_description }}', '{{ addslashes($promo->description) }}')" 
+                                            class="{{ $index % 2 == 0 ? 'bg-white/10 hover:bg-white/20' : 'bg-slate-900 hover:bg-slate-800' }} text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
+                                        Detail
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <a href="{{ route('booking.create', $portfolio->category_id) }}" class="glass py-3 md:py-4 rounded-xl text-center text-[9px] md:text-[11px] font-black uppercase tracking-widest text-gray-900 active:scale-95 transition-all flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-calendar-check"></i> Booking Paket Ini
-                            </a>
+
+                            <div class="w-1/3 relative h-full flex items-center justify-center">
+                                <div class="w-full h-48 bg-gray-800 rounded-3xl border-2 {{ $index % 2 == 0 ? 'border-white/10' : 'border-white/30' }} overflow-hidden shadow-2xl {{ $index % 2 == 0 ? 'rotate-2' : '-rotate-2' }}">
+                                    <img src="{{ asset('storage/' . $promo->main_image) }}" class="w-full h-full object-cover">
+                                </div>
+                                
+                                <div class="absolute -bottom-2 -left-4 w-20 h-20 bg-gray-700 rounded-full border-4 {{ $index % 2 == 0 ? 'border-slate-900' : 'border-rose-400' }} overflow-hidden shadow-xl">
+                                    <img src="{{ asset('storage/' . $promo->secondary_image) }}" class="w-full h-full object-cover">
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    @endforeach
+
+                    @if($bundlings->isEmpty())
+                        <div class="w-full text-center py-10 text-gray-300 italic uppercase font-black text-xs tracking-widest">
+                            Belum ada promo aktif bulan ini
+                        </div>
+                    @endif
+
                 </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- promo modal -->
+    <div id="promoModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md">
+        <div class="bg-white rounded-[2.5rem] max-w-lg w-full p-8 shadow-2xl relative border-4 border-rose-50">
+            <button onclick="closePromoModal()" class="absolute top-6 right-6 text-gray-400 hover:text-rose-500 text-xl">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+            
+            <span class="text-[9px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1 rounded-full">Detail Bundling</span>
+            <h3 id="modalTitle" class="text-2xl font-black italic uppercase tracking-tighter text-slate-900 mt-4 mb-2">Title</h3>
+            
+            <div class="space-y-6">
+                <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                    <p class="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1">Highlight</p>
+                    <p id="modalShortDesc" class="text-xs font-bold text-slate-700 italic"></p>
+                </div>
+                
+                <div>
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Deskripsi Lengkap</p>
+                    <p id="modalFullDesc" class="text-xs text-gray-500 leading-relaxed"></p>
+                </div>
+            </div>
+            
+            <button id="btnBookingPromo" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl mt-8 hover:bg-rose-500 transition-all uppercase tracking-widest text-[10px]">
+                Booking Sekarang
+            </button>
+        </div>
+    </div>
+
+    <!-- portofolio -->
+
+    <section id="portfolio" class="max-w-6xl mx-auto px-6 py-12">
+        <h3 class="text-[9px] font-black text-rose-400 uppercase tracking-[0.3em] mb-8 text-center">Portfolio Highlights</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @foreach($portfolios as $index => $portfolio)
+            <div class="relative group aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden shadow-sm {{ $index % 2 != 0 ? 'md:mt-12' : '' }}">
+                <img src="{{ asset('storage/' . $portfolio->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                
+                <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center p-6 text-center">
+                    <h4 class="text-white font-black italic text-lg leading-tight">{{ $portfolio->category->name }}</h4>
+                    <p class="text-rose-200 font-bold text-xs mb-4">Rp{{ number_format($portfolio->category->base_price, 0, ',', '.') }}</p>
+                    <a href="{{ route('booking.create', $portfolio->category_id) }}" class="bg-white text-slate-900 px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all">Book Now</a>
+                </div>
+            </div>
             @endforeach
         </div>
     </section>
 
-    <footer class="py-20 text-center border-t border-pink-50">
-        <div class="text-3xl font-black italic mb-4">MUA<span class="text-pink-500">.</span></div>
-        <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest italic">Melayani Area Tegal - Brebes - Slawi</p>
-        <p class="mt-10 text-[9px] font-bold text-gray-300 uppercase tracking-widest">&copy; 2026 Crafted by Your Informatics Partner ✨</p>
+    <section id="pricelist" class="max-w-6xl mx-auto px-6 py-24">
+        <div class="bg-white rounded-[3rem] p-8 md:p-16 border border-rose-50 shadow-sm">
+            <h3 class="text-[9px] font-black text-rose-400 uppercase tracking-[0.3em] mb-12 text-center">Pricelist 2026</h3>
+            <div class="grid md:grid-cols-2 gap-x-12 gap-y-2">
+                @foreach($categories as $category)
+                <a href="{{ route('booking.create', $category->id) }}" class="group flex justify-between items-center border-b border-rose-50 py-5 hover:px-4 hover:bg-rose-50 rounded-2xl transition-all">
+                    <div>
+                        <span class="text-xs font-bold text-gray-700 uppercase group-hover:text-rose-500 transition-colors">{{ $category->name }}</span>
+                        <p class="text-[8px] text-gray-400 mt-1 uppercase italic opacity-0 group-hover:opacity-100">Klik untuk detail booking</p>
+                    </div>
+                    <span class="text-xs font-black text-rose-400 tracking-widest">Rp{{ number_format($category->base_price, 0, ',', '.') }}</span>
+                </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="py-12 border-t border-rose-50 text-center">
+        <h2 class="text-lg font-black italic text-rose-500 uppercase mb-6">Follow Me</h2>
+        <div class="flex justify-center gap-6">
+            <a href="#" class="text-rose-400 hover:text-rose-600 text-xl transition-transform hover:scale-125"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" class="text-rose-400 hover:text-rose-600 text-xl transition-transform hover:scale-125"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="#" class="text-rose-400 hover:text-rose-600 text-xl transition-transform hover:scale-125"><i class="fa-brands fa-tiktok"></i></a>
+        </div>
+        <p class="text-[8px] font-black text-gray-300 uppercase tracking-[0.5em] mt-10">© 2026 Dya's Makeup Studio</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper('.promoSwiper', {
+            slidesPerView: 'auto',
+            spaceBetween: 20,
+            loop: true,
+            autoplay: { delay: 3000, disableOnInteraction: false },
+        });
+
+        // fungsi promo 
+        function openPromoDetail(id, title, shortDesc, fullDesc, duration, targetPerson) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalShortDesc').innerText = shortDesc;
+            document.getElementById('modalFullDesc').innerText = fullDesc;
+            
+            // Set Link ke Booking dengan parameter bundling
+            const bookingBtn = document.getElementById('btnBookingPromo');
+            bookingBtn.onclick = () => {
+                window.location.href = `/booking/promo/${id}`;
+            };
+
+            document.getElementById('promoModal').classList.replace('hidden', 'flex');
+        }
+
+        function closePromoModal() {
+            const modal = document.getElementById('promoModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
 </body>
 </html>

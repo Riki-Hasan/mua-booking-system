@@ -23,6 +23,7 @@ class Booking extends Model
         'payment_proof',
         'status',
         'person_count',
+        'bundling_id',
     ];
 
     /**
@@ -39,5 +40,10 @@ class Booking extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function bundling()
+    {
+        return $this->belongsTo(Bundling::class);
     }
 }

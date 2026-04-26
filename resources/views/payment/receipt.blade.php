@@ -48,7 +48,7 @@
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-gray-400 font-bold uppercase text-[10px]">Layanan</span>
-                    <span class="font-black text-gray-900 uppercase italic">{{ $booking->category->name }}</span>
+                    <span class="font-black text-gray-900 uppercase italic">{{ $booking->category->name ?? $booking->bundling->subject }} (promo)</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px]">
                     <span class="text-gray-400 font-bold uppercase">Jadwal Rias</span>

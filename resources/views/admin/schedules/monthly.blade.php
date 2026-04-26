@@ -5,6 +5,12 @@
                 Agenda {{ \Carbon\Carbon::create($year, $month)->format('F Y') }}
             </h2>
             <div class="flex gap-2 no-print">
+                <div class="">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 bg-white text-gray-500 px-4 py-3 rounded-xl shadow-sm border border-gray-100 hover:text-pink-600 transition-all active:scale-95">
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Back</span>
+                    </a>
+                </div>
                 <a href="?month={{ $month-1 }}&year={{ $year }}" class="p-2 bg-white rounded-xl border border-gray-100 text-gray-400 hover:text-pink-500 transition-all">&larr;</a>
                 <a href="?month={{ $month+1 }}&year={{ $year }}" class="p-2 bg-white rounded-xl border border-gray-100 text-gray-400 hover:text-pink-500 transition-all">&rarr;</a>
             </div>
@@ -37,7 +43,7 @@
 
                                 <td class="p-6">
                                     <span class="block font-bold text-gray-800 text-sm">{{ $b->customer_name }}</span>
-                                    <span class="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">{{ $b->category->name }}</span>
+                                    <span class="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">{{ $b->category->name ?? $b->bundling->subject ?? 'Layanan/Promo'}}</span>
                                 </td>
 
                                 <td class="p-6">

@@ -110,9 +110,16 @@
                         <input type="time" id="timeValue" 
                                class="w-full bg-white/10 border border-white/20 rounded-2xl p-5 md:p-6 text-white text-3xl md:text-4xl font-black text-center focus:ring-4 focus:ring-pink-500/30 transition-all outline-none">
                     </div>
-                    <p class="text-[9px] text-gray-400 text-center italic leading-relaxed">
-                        Estimasi durasi: <strong>{{ $category->duration_minutes }} menit</strong>.
-                    </p>
+                        @php
+                            // Ambil jumlah orang dari URL, default 1
+                            $persons = request('person_count', 1);
+                            $multiplier = ($persons >= 2) ? 1.5 : 1.0;
+                            $calculatedDuration = (int)($category->duration_minutes * $multiplier);
+                        @endphp
+
+                        <p class="text-[9px] text-gray-400 text-center italic leading-relaxed">
+                            Estimasi durasi ({{ $persons }} Orang): <strong>{{ $calculatedDuration }} menit</strong>.
+                        </p>
                 </div>
             </div>
 
@@ -143,7 +150,14 @@
     <script>
         let selectedDay = null;
         let dayBookings = []; 
-        const serviceDuration = {{ $category->duration_minutes }};
+
+        @php
+            $persons = request('person_count', 1);
+            $multiplier = ($persons >= 2) ? 1.5 : 1.0;
+            $calculatedDuration = (int)($category->duration_minutes * $multiplier);
+        @endphp
+        const serviceDuration = {{ $calculatedDuration }};
+        const personCount = {{ $persons }};
         const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         let currentMonth = new Date().getMonth();
         let currentYear = 2026;
@@ -280,39 +294,44 @@
         }
 
         function confirmSelection() {
-            const timeInput = document.getElementById('timeValue').value;
-            if (!selectedDay || !timeInput) {
-                alert("Pilih tanggal dan jam rias terlebih dahulu!");
-                return;
-            }
-
-            const [h, m] = timeInput.split(':').map(Number);
-            const userStart = h * 60 + m;
-            const userEnd = userStart + serviceDuration;
-
-            let clashingRecord = null;
-            dayBookings.forEach(booking => {
-                const [bhS, bmS] = booking.start.split(':').map(Number);
-                const [bhE, bmE] = booking.end.split(':').map(Number);
-                const existingStart = bhS * 60 + bmS;
-                const existingEnd = bhE * 60 + bmE;
-
-                if (userStart < existingEnd && existingStart < userEnd) {
-                    clashingRecord = booking;
+                const timeInput = document.getElementById('timeValue').value;
+                if (!selectedDay || !timeInput) {
+                    alert("Pilih tanggal dan jam rias terlebih dahulu!");
+                    return;
                 }
-            });
 
-            if (clashingRecord) {
-                openClashModal(clashingRecord);
-                return;
+                const [h, m] = timeInput.split(':').map(Number);
+                const userStart = h * 60 + m;
+                const userEnd = userStart + serviceDuration;
+
+                let clashingRecord = null;
+                dayBookings.forEach(booking => {
+                    const [bhS, bmS] = booking.start.split(':').map(Number);
+                    const [bhE, bmE] = booking.end.split(':').map(Number);
+                    const existingStart = bhS * 60 + bmS;
+                    const existingEnd = bhE * 60 + bmE;
+
+                    if (userStart < existingEnd && existingStart < userEnd) {
+                        clashingRecord = booking;
+                    }
+                });
+
+                if (clashingRecord) {
+                    openClashModal(clashingRecord);
+                    return;
+                }
+
+                const dateStr = `${selectedDay}-${monthNames[currentMonth]}-${currentYear}`;
+                
+                // REVISI: Mengirim kembali person_count ke halaman create agar input tidak reset
+                window.location.href = `{{ route('booking.create', $category->id) }}?date=${dateStr}&time=${timeInput}&person_count=${personCount}`;
             }
 
-            const dateStr = `${selectedDay}-${monthNames[currentMonth]}-${currentYear}`;
-            window.location.href = `{{ route('booking.create', $category->id) }}?date=${dateStr}&time=${timeInput}`;
-        }
-
-        initSelectors();
-        renderCalendar();
+            // Jalankan inisialisasi
+            document.addEventListener('DOMContentLoaded', () => {
+                initSelectors();
+                renderCalendar();
+            });
     </script>
 </body>
 </html>

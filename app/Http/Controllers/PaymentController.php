@@ -78,7 +78,9 @@ class PaymentController extends Controller
 
     public function summary($id)
     {
-        $booking = Booking::findOrFail($id);
+
+        $booking = Booking::with(['category', 'bundling', 'location'])->findOrFail($id);
+
         return view('payment.summary', [
             'booking' => $booking,
             'total' => $booking->total_amount,
@@ -88,7 +90,10 @@ class PaymentController extends Controller
 
     public function showReceipt($id)
     {
-        $booking = \App\Models\Booking::with('category')->findOrFail($id);
+        // Eager load category, bundling, dan location sekaligus untuk mencegah crash di View
+        $booking = \App\Models\Booking::with(['category', 'bundling', 'location'])->findOrFail($id);
+        
+        // Logika penentuan status pembayaran
         $isFull = ($booking->status == 'paid_full' || $booking->status == 'confirmed');
         $paidAmount = $isFull ? $booking->total_amount : $booking->dp_amount;
         $remainingBalance = $booking->total_amount - $paidAmount;

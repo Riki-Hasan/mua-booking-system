@@ -13,7 +13,7 @@ class OrderController extends Controller
     public function index()
     {
         // Kita filter: status 'pending' tidak akan ditarik ke view
-        $orders = Booking::with(['category', 'location'])
+        $orders = Booking::with(['category', 'bundling', 'location'])
             ->whereIn('status', ['paid_dp', 'paid_full', 'confirmed']) 
             ->latest()
             ->get();
@@ -32,31 +32,34 @@ class OrderController extends Controller
 
     public function downloadReport()
     {
-        // Laporan juga hanya mengambil data yang valid (sudah bayar/confirmed)
+        // Mengambil data booking yang valid di bulan ini [cite: 2]
         $orders = \App\Models\Booking::with('category')
                     ->whereIn('status', ['paid_dp', 'paid_full', 'confirmed'])
                     ->whereMonth('booking_date', now()->month)
                     ->get();
 
+        // TOTAL PENDAPATAN BULAN INI: Dari total harga full semua pesanan 
         $totalIncome = $orders->sum('total_amount');
 
-        $pdf = Pdf::loadView('admin.orders.report_pdf', compact('orders', 'totalIncome'));
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.report_pdf', compact('orders', 'totalIncome'));
 
         return $pdf->download('Laporan_MUA_' . now()->format('M_Y') . '.pdf');
     }
 
     public function destroy($id)
-    {
-        try {
-            $booking = \App\Models\Booking::findOrFail($id);
-            $booking->delete();
+        {
+            try {
+                $booking = Booking::findOrFail($id);
+                $customerName = $booking->customer_name; // Simpan nama dulu
+                $booking->delete();
 
-            return redirect()->route('admin.orders.index')
-                ->with('success', 'Pesanan #' . $id . ' berhasil dihapus.');
-                
-        } catch (\Exception $e) {
-            return redirect()->route('admin.orders.index')
-                ->with('error', 'Gagal menghapus pesanan: ' . $e->getMessage());
+                // REVISI 2: Modal sukses dengan nama pelanggan
+                return redirect()->route('admin.orders.index')
+                    ->with('success', 'Pesanan milik ' . $customerName . ' berhasil dihapus dari sistem.');
+                    
+            } catch (\Exception $e) {
+                return redirect()->route('admin.orders.index')
+                    ->with('error', 'Gagal menghapus: ' . $e->getMessage());
+            }
         }
-    }
 }

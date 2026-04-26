@@ -4,7 +4,7 @@
             <h2 class="font-bold text-2xl text-pink-600 leading-tight tracking-tighter">
                 {{ __('Manajemen Jadwal & Booking Offline') }}
             </h2>
-            <a href="{{ route('dashboard') }}" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-pink-100 transition-all active:scale-95">
+            <a href="{{ route('dashboard') }}" class="flex items-center bg-white text-gray-500 px-4 py-3 rounded-xl shadow-sm border border-gray-100 hover:text-pink-600 transition-all active:scale-95">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>

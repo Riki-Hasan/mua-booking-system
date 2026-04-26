@@ -53,7 +53,7 @@ class DashboardController extends Controller
         $year = $request->get('year', now()->year);
         $showPast = $request->has('show_past');
 
-        $query = Booking::with('category')
+        $query = Booking::with(['category', 'bundling', 'location'])
             ->whereMonth('booking_date', $month)
             ->whereYear('booking_date', $year)
             ->whereIn('status', ['paid_dp', 'paid_full', 'confirmed'])

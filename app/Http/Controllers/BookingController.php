@@ -5,23 +5,59 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Location;
-use App\Models\User;
-use App\Mail\NewOrderMail;
-use Illuminate\Support\Facades\Mail;
+use App\Models\Bundling;
+use App\Models\Holiday;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Models\Holiday;
+use Illuminate\Support\Facades\Mail;
 
 class BookingController extends Controller
 {
+    /**
+     * Helper: Mendapatkan data Kategori atau Promo secara dinamis
+     */
+    private function getSourceData($id)
+    {
+        if (str_starts_with($id, 'promo-')) {
+            $realId = str_replace('promo-', '', $id);
+            $bundling = Bundling::findOrFail($realId);
+            
+            // Samarkan bundling menjadi object yang serupa dengan Category
+            return (object)[
+                'id' => 'promo-' . $bundling->id,
+                'name' => $bundling->subject,
+                'base_price' => $bundling->price,
+                'duration_minutes' => $bundling->duration_minutes,
+                'is_bundling' => true,
+                'target_person' => $bundling->target_person_count
+            ];
+        }
+        
+        $category = Category::findOrFail($id);
+        // Tambahkan property target_person default untuk kategori biasa
+        $category->target_person = 1;
+        $category->is_bundling = false;
+        return $category;
+    }
+
     public function create($category_id)
     {
-        $category = Category::findOrFail($category_id);
+        $category = $this->getSourceData($category_id);
         $locations = Location::all();
         return view('booking.create', compact('category', 'locations'));
     }
 
-    // ... bagian atas tetap sama ...
+    public function createFromPromo($bundling_id)
+    {
+        // Langsung arahkan ke fungsi create dengan prefix promo-
+        return $this->create('promo-' . $bundling_id);
+    }
+
+    public function calendar($category_id)
+    {
+        $category = $this->getSourceData($category_id);
+        return view('booking.calendar', compact('category'));
+    }
 
     public function store(Request $request)
     {
@@ -31,16 +67,40 @@ class BookingController extends Controller
             'booking_date' => 'required',
             'start_time' => 'required',
             'address' => 'required',
-            'person_count' => 'required|numeric|min:1', // Tambahkan validasi
+            'person_count' => 'required|numeric|min:1|max:2',
         ]);
 
+        $source = $this->getSourceData($request->category_id);
+        $persons = (int)$request->person_count;
+
+        // 1. LOGIKA HARGA (Sesuai Rule Mas Riki)
+        $calculatedPrice = $source->base_price;
+        if ($source->is_bundling) {
+            // Promo 1 orang diubah jadi 2 orang -> Harga x 2
+            if ($source->target_person == 1 && $persons == 2) {
+                $calculatedPrice = $source->base_price * 2;
+            }
+        } else {
+            // Layanan biasa -> Harga x Jumlah Orang
+            $calculatedPrice = $source->base_price * $persons;
+        }
+
+        // 2. LOGIKA DURASI (Sesuai Rule Mas Riki)
+        // Jika 2 orang (baik promo maupun biasa), durasi dikali 1.5
+        $multiplier = ($persons >= 2) ? 1.5 : 1.0;
+        $actualDuration = (int)($source->duration_minutes * $multiplier);
+
+        $endTime = Carbon::parse($request->start_time)
+                    ->addMinutes($actualDuration)
+                    ->format('H:i');
+
+        // 3. KONVERSI TANGGAL INDONESIA
         $bulanIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         $bulanAngka = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
         $dateStep1 = str_replace($bulanIndo, $bulanAngka, $request->booking_date);
-        $dbDate = \Carbon\Carbon::createFromFormat('d-m-Y', $dateStep1)->format('Y-m-d');
+        $dbDate = Carbon::createFromFormat('d-m-Y', $dateStep1)->format('Y-m-d');
 
-        $category = Category::findOrFail($request->category_id);
-        
+        // 4. ONGKIR (Tetap berbayar, transport gratis dihapus)
         $additionalPrice = 0;
         $locationId = null;
         if ($request->location_id != 0) {
@@ -49,27 +109,23 @@ class BookingController extends Controller
             $locationId = $location->id;
         }
 
-        // REVISI: Harga Paket x Jumlah Orang + Ongkir
-        $totalAmount = ($category->base_price * $request->person_count) + $additionalPrice;
-        
-        $endTime = \Carbon\Carbon::parse($request->start_time)
-                    ->addMinutes($category->duration_minutes)
-                    ->format('H:i');
+        $totalAmount = $calculatedPrice + $additionalPrice;
 
         $booking = Booking::create([
             'order_id' => 'MUA-' . strtoupper(bin2hex(random_bytes(3))),
             'customer_name' => $request->customer_name,
             'whatsapp_number' => $request->whatsapp_number,
             'address' => $request->address,
-            'category_id' => $category->id,
             'location_id' => $locationId,
             'booking_date' => $dbDate,
             'start_time' => $request->start_time,
             'end_time' => $endTime,
-            'person_count' => $request->person_count, // Simpan jumlah orang
+            'person_count' => $persons,
             'total_amount' => $totalAmount,
             'dp_amount' => $totalAmount * 0.5,
             'status' => 'pending',
+            'category_id' => $source->is_bundling ? null : $source->id,
+            'bundling_id' => $source->is_bundling ? str_replace('promo-', '', $source->id) : null,
         ]);
 
         return redirect()->route('payment.summary', $booking->id);
@@ -77,42 +133,30 @@ class BookingController extends Controller
 
     public function checkAvailability(Request $request)
     {
-        // Ambil input dari query string
         $month = $request->query('month');
         $year = $request->query('year');
 
-        // Pastikan variabel tidak kosong
-        if (!$month || !$year) {
-            return response()->json([]);
-        }
+        if (!$month || !$year) return response()->json([]);
 
-        // 1. Ambil Data Booking
         $bookings = Booking::whereMonth('booking_date', $month)
                     ->whereYear('booking_date', $year)
                     ->whereIn('status', ['confirmed', 'paid_dp', 'paid_full', 'success'])
                     ->get();
 
-        // 2. Ambil Data Libur (Gunakan try-catch agar tidak crash jika tabel belum ada)
         try {
             $holidays = Holiday::whereMonth('holiday_date', $month)
                         ->whereYear('holiday_date', $year)
                         ->get();
-        } catch (\Exception $e) {
-            $holidays = collect(); // Jika error/tabel belum ada, buat koleksi kosong saja
-        }
+        } catch (\Exception $e) { $holidays = collect(); }
 
         $availability = [];
-
-        // Tandai Hari Libur
         foreach ($holidays as $h) {
-            $day = (int)\Carbon\Carbon::parse($h->holiday_date)->format('j');
+            $day = (int)Carbon::parse($h->holiday_date)->format('j');
             $availability[$day] = ['status' => 'holiday', 'details' => []];
         }
 
-        // Tandai Data Booking
         foreach ($bookings as $b) {
-            $day = (int)\Carbon\Carbon::parse($b->booking_date)->format('j');
-            
+            $day = (int)Carbon::parse($b->booking_date)->format('j');
             if (isset($availability[$day]) && $availability[$day]['status'] === 'holiday') continue;
 
             if (!isset($availability[$day])) {
@@ -120,22 +164,14 @@ class BookingController extends Controller
             }
             
             $availability[$day]['details'][] = [
-                'start' => \Carbon\Carbon::parse($b->start_time)->format('H:i'),
-                'end' => \Carbon\Carbon::parse($b->end_time)->format('H:i')
+                'start' => Carbon::parse($b->start_time)->format('H:i'),
+                'end' => Carbon::parse($b->end_time)->format('H:i')
             ];
             
             if (count($availability[$day]['details']) >= 3) {
                 $availability[$day]['status'] = 'full';
             }
         }
-
         return response()->json((object)$availability);
-    }
-
-
-    public function calendar($category_id)
-    {
-        $category = Category::findOrFail($category_id);
-        return view('booking.calendar', compact('category'));
     }
 }

@@ -13,7 +13,7 @@
     <div class="max-w-xl mx-auto bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-pink-100">
         <div class="p-10 lg:p-14 text-center">
             <h1 class="text-3xl font-black text-gray-900 tracking-tighter mb-2 italic uppercase">Ringkasan Pesanan</h1>
-            <p class="text-pink-600 font-bold mb-10 uppercase text-xs tracking-[0.2em]">Layanan: {{ $booking->category->name }}</p>
+            <p class="text-pink-600 font-bold mb-10 uppercase text-xs tracking-[0.2em]">Layanan: {{ $booking->category->name ?? $booking->bundling->subject }} (promo)</p>
 
             <div class="bg-gray-50 rounded-3xl p-8 mb-8 space-y-4 text-left border border-gray-100">
                 <div class="flex justify-between border-b border-gray-200 pb-3">

@@ -34,4 +34,17 @@ class LocationController extends Controller
         Location::findOrFail($id)->delete();
         return back()->with('success', 'Wilayah berhasil dihapus!');
     }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'region_name' => 'required|string',
+            'additional_price' => 'required|numeric',
+        ]);
+
+        $location = \App\Models\Location::findOrFail($id);
+        $location->update($request->all());
+
+        return back()->with('success', 'Wilayah berhasil diperbarui!');
+    }
 }

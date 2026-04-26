@@ -14,11 +14,15 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Models\Portfolio;
 
 // --- SISI CLIENT (PUBLIK) ---
 Route::get('/', function () {
-    $categories = Category::all();
-    return view('welcome', compact('categories'));
+    return view('welcome', [
+        'categories' => Category::all(),
+        'portfolios' => Portfolio::with('category')->latest()->get(),
+        'bundlings' => \App\Models\Bundling::where('is_active', true)->get()
+    ]);
 });
 
 // --- SISTEM BOOKING ---
@@ -72,13 +76,22 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::post('/categories/update-image', [App\Http\Controllers\Admin\CategoryController::class, 'updateImage'])->name('categories.update_image');
     
     // Pastikan resource categories juga ada
-    Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class);
     Route::delete('/portfolios/{id}', [App\Http\Controllers\Admin\CategoryController::class, 'destroyPortfolio'])->name('portfolios.destroy');
     Route::patch('/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings.update');
     Route::post('/schedules/toggle-holiday', [ScheduleController::class, 'toggleHoliday'])->name('schedules.toggle_holiday');
     Route::get('/test-reminder', [DashboardController::class, 'testReminder'])->name('test.reminder');
     //midtrans schedule
     Route::post('/schedules/prepare-payment', [ScheduleController::class, 'preparePayment'])->name('schedules.prepare');
+
+    Route::post('/profile/photo', [ScheduleController::class, 'updateProfilePhoto'])
+         ->name('profile.update_photo');
+
+    // Route untuk Manajemen Bundling
+    Route::post('/bundlings', [ScheduleController::class, 'storeBundling'])->name('bundlings.store');
+    Route::delete('/bundlings/{id}', [ScheduleController::class, 'destroyBundling'])->name('bundlings.destroy');
+
+    // routes/web.php (Pastikan di dalam group admin)
+    Route::put('/bundlings/{id}', [ScheduleController::class, 'updateBundling'])->name('bundlings.update');
 });
 
 // Redirect Breeze Default Dashboard ke Admin Dashboard
@@ -91,7 +104,8 @@ Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
-
+// routes/web.php
+Route::get('/booking/promo/{bundling_id}', [BookingController::class, 'createFromPromo'])->name('booking.promo');
 
 
 

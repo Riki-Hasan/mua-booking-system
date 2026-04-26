@@ -1,9 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-2xl text-pink-600 leading-tight">
-            {{ __('Manajemen Wilayah & Ongkir') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-bold text-2xl text-pink-600 leading-tight tracking-tighter">
+                {{ __('Manajemen Wilayah & Ongkir') }}
+            </h2>
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-2 bg-white text-gray-500 px-4 py-3 rounded-xl shadow-sm border border-gray-100 hover:text-pink-600 transition-all active:scale-95">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
     </x-slot>
+
 
     <div class="py-12 px-6">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -42,12 +48,18 @@
                             <td class="px-8 py-6 font-bold text-gray-800">{{ $location->region_name }}</td>
                             <td class="px-8 py-6 font-medium text-pink-600 italic">Rp{{ number_format($location->additional_price, 0, ',', '.') }}</td>
                             <td class="px-8 py-6 text-center">
-                                <form action="{{ route('admin.locations.destroy', $location->id) }}" method="POST" onsubmit="return confirm('Hapus wilayah ini?')">
-                                    @csrf @method('DELETE')
-                                    <button class="text-rose-500 hover:text-rose-700 transition-colors p-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <div class="flex justify-center items-center gap-2">
+                                    <button onclick="openEditLocationModal({{ json_encode($location) }})" class="text-blue-500 hover:text-blue-700 transition-colors p-2">
+                                        <i class="fa-solid fa-pen-to-square text-lg"></i>
                                     </button>
-                                </form>
+
+                                    <form action="{{ route('admin.locations.destroy', $location->id) }}" method="POST" onsubmit="return confirm('Hapus wilayah ini?')">
+                                        @csrf @method('DELETE')
+                                        <button class="text-rose-500 hover:text-rose-700 transition-colors p-2">
+                                            <i class="fa-solid fa-trash-can text-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @endforeach
@@ -56,4 +68,51 @@
             </div>
         </div>
     </div>
+
+    <div id="modalEditLocation" class="fixed inset-0 z-[110] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl border-4 border-blue-50 animate-pop relative">
+            <h3 class="text-xl font-black text-gray-900 uppercase italic tracking-tighter mb-6">Edit Wilayah</h3>
+            
+            <form id="editLocationForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-1">Nama Wilayah</label>
+                        <input type="text" name="region_name" id="edit_region_name" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-bold" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-1">Biaya Tambahan (Rp)</label>
+                        <input type="number" name="additional_price" id="edit_additional_price" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-bold" required>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeEditLocationModal()" class="flex-1 bg-gray-100 text-gray-400 font-black py-4 rounded-2xl uppercase text-[10px]">Batal</button>
+                        <button type="submit" class="flex-1 bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-[10px] tracking-widest">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .animate-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+    <script>
+        function openEditLocationModal(location) {
+            document.getElementById('edit_region_name').value = location.region_name;
+            document.getElementById('edit_additional_price').value = location.additional_price;
+            
+            // Set Action Form ke rute update
+            document.getElementById('editLocationForm').action = `/admin/locations/${location.id}`;
+            
+            // Tampilkan Modal
+            document.getElementById('modalEditLocation').classList.replace('hidden', 'flex');
+        }
+
+        function closeEditLocationModal() {
+            document.getElementById('modalEditLocation').classList.replace('flex', 'hidden');
+        }
+    </script>
 </x-app-layout>

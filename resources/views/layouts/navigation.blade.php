@@ -36,12 +36,15 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @keydown.escape.window="openModal = false"
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" 
-         style="display: none;">
+         /* PERBAIKAN: Tambah overflow-y-auto dan ganti items-center jadi items-start */
+         class="fixed inset-0 z-[100] flex justify-center items-start overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-sm" 
+         style="display: none;"
+         x-cloak>
         
         <div class="absolute inset-0" @click="openModal = false"></div>
         
-        <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl border border-pink-50 relative transform transition-all overflow-hidden">
+        /* PERBAIKAN: Tambah my-auto agar tetap center jika konten pendek, tapi bisa scroll jika panjang */
+        <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl border border-pink-50 relative transform transition-all my-auto">
             
             <button @click="openModal = false" class="absolute top-6 right-6 w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400 rounded-full hover:bg-rose-50 hover:text-rose-500 transition-all">
                 <i class="fa-solid fa-xmark"></i>
@@ -61,6 +64,45 @@
 
             <hr class="border-gray-50 mb-6">
 
+            <div class="mb-8">
+                @if(session('success'))
+                    <div class="mb-4 p-3 bg-emerald-500 text-white text-[10px] font-bold rounded-xl shadow-lg">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="mb-4 p-3 bg-rose-500 text-white text-[10px] font-bold rounded-xl shadow-lg">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                <form action="{{ route('admin.profile.update_photo') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <label class="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Foto Branding MUA (Halaman Depan)</label>
+                    
+                    <div class="bg-gray-50 p-4 rounded-3xl border border-gray-100 text-center">
+                        <div class="w-24 h-32 bg-white rounded-2xl mx-auto mb-4 overflow-hidden border border-pink-100 flex items-center justify-center">
+                            @if(Auth::user()->profile_photo_path)
+                                <img src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" class="w-full h-full object-cover">
+                            @else
+                                <i class="fa-solid fa-user-tie text-pink-200 text-3xl"></i>
+                            @endif
+                        </div>
+                        <input type="file" name="profile_photo" class="w-full text-[9px] text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[9px] file:font-black file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 cursor-pointer">
+                    </div>
+
+                    <button type="submit" class="w-full bg-slate-900 text-white font-black py-3 rounded-2xl shadow-lg uppercase text-[9px] tracking-widest hover:bg-pink-600 transition-all">
+                        Update Foto Branding
+                    </button>
+                </form>
+            </div>
+
+            <hr class="border-gray-50 mb-6">
+
             <form action="{{ route('admin.profile.settings.update') }}" method="POST" class="space-y-6">
                 @csrf @method('PATCH')
                 <div class="bg-gray-50 p-5 rounded-3xl border border-gray-100">
@@ -76,9 +118,11 @@
                     Simpan Pengaturan
                 </button>
             </form> 
-            <a href="{{ route('admin.test.reminder') }}" class="w-full bg-blue-500 text-white text-center font-black py-4 rounded-2xl hover:bg-blue-600 transition-all uppercase text-[10px] tracking-widest mb-2">
+
+            <a href="{{ route('admin.test.reminder') }}" class="w-full block text-center bg-blue-500 text-white font-black py-4 rounded-2xl hover:bg-blue-600 transition-all uppercase text-[10px] tracking-widest mt-6 mb-2">
                 🚀 Test Kirim Email Sekarang
             </a>
+
             <form method="POST" action="{{ route('logout') }}" class="mt-2">
                 @csrf
                 <button type="submit" class="w-full bg-rose-50 text-rose-600 font-black py-4 rounded-2xl hover:bg-rose-600 hover:text-white transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 cursor-pointer">

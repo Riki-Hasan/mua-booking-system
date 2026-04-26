@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Midtrans\Config;
 use Midtrans\Snap;
+use App\Models\Bundling;
+use Illuminate\Support\Facades\Storage;
 
 class ScheduleController extends Controller
 {
@@ -139,5 +141,112 @@ class ScheduleController extends Controller
             Holiday::create(['holiday_date' => $date]);
             return response()->json(['status' => 'added']);
         }
+    }
+
+
+    // 1. Update Foto Profil Branding
+    public function updateProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $user = auth()->user();
+
+        // Hapus foto lama jika ada
+        if ($user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+        }
+
+        // Simpan foto baru
+        $path = $request->file('profile_photo')->store('profile-photos', 'public');
+        $user->update(['profile_photo_path' => $path]);
+
+        return back()->with('success', 'Foto branding berhasil diperbarui!');
+    }
+
+    // 2. Simpan Promo Bundling Baru
+    public function storeBundling(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string',
+            'price' => 'required|numeric',
+            'main_image' => 'required|image|max:2048',
+            'secondary_image' => 'required|image|max:2048',
+            'short_description' => 'required|string|max:150',
+            'description' => 'required|string',
+            'duration_minutes' => 'required|numeric',
+            'target_person_count' => 'required|numeric',
+        ]);
+
+        // Simpan Gambar
+        $mainPath = $request->file('main_image')->store('bundlings', 'public');
+        $secondaryPath = $request->file('secondary_image')->store('bundlings', 'public');
+
+        Bundling::create([
+            'subject' => $request->subject,
+            'price' => $request->price,
+            'main_image' => $mainPath,
+            'secondary_image' => $secondaryPath,
+            'short_description' => $request->short_description,
+            'description' => $request->description,
+            'include_text' => $request->short_description,
+            'duration_minutes' => $request->duration_minutes,
+            'target_person_count' => $request->target_person_count,
+        ]);
+
+        return back()->with('success', 'Promo Bundling berhasil ditambahkan!');
+    }
+
+    // 3. Hapus Bundling
+    public function destroyBundling($id)
+    {
+        $bundling = Bundling::findOrFail($id);
+        Storage::disk('public')->delete([$bundling->main_image, $bundling->secondary_image]);
+        $bundling->delete();
+
+        return back()->with('success_delete', 'Promo berhasil dihapus.');
+    }
+
+    public function updateBundling(Request $request, $id)
+    {
+        $bundling = \App\Models\Bundling::findOrFail($id);
+        
+        $request->validate([
+            'subject' => 'required|string',
+            'price' => 'required|numeric',
+            'short_description' => 'required|string',
+            'description' => 'nullable|string',
+            'main_image' => 'nullable|image|max:2048',
+            'secondary_image' => 'nullable|image|max:2048',
+            'duration_minutes' => 'required|numeric',
+        'target_person_count' => 'required|numeric',
+        ]);
+
+        $data = [
+            'subject' => $request->subject,
+            'price' => $request->price,
+            'short_description' => $request->short_description,
+            'description' => $request->description,
+            'duration_minutes' => $request->duration_minutes,
+        'target_person_count' => $request->target_person_count,
+            'include_text' => $request->short_description,
+        ];
+
+        // Cek jika ada upload Foto Utama baru
+        if ($request->hasFile('main_image')) {
+            Storage::disk('public')->delete($bundling->main_image);
+            $data['main_image'] = $request->file('main_image')->store('bundlings', 'public');
+        }
+
+        // Cek jika ada upload Foto Kecil baru
+        if ($request->hasFile('secondary_image')) {
+            Storage::disk('public')->delete($bundling->secondary_image);
+            $data['secondary_image'] = $request->file('secondary_image')->store('bundlings', 'public');
+        }
+
+        $bundling->update($data);
+
+        return back()->with('success_edit', 'Promo Bundling berhasil diperbarui!');
     }
 }

@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'reminder_days',
+        'profile_photo_path',
     ];
 
     /**

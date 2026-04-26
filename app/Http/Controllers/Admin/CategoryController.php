@@ -8,14 +8,25 @@ use App\Models\Portfolio; // Import Model Portfolio
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use App\Models\Bundling;
+
 
 class CategoryController extends Controller
 {
     // 1. Menampilkan daftar paket
     public function index()
     {
+        // 1. Ambil data kategori (data lama)
         $categories = Category::all();
-        return view('admin.categories.index', compact('categories'));
+        
+        // 2. Ambil data portfolio (data lama)
+        $portfolios = Portfolio::with('category')->latest()->get();
+
+        // 3. AMBIL DATA BUNDLING (Data Baru untuk memperbaiki error)
+        $bundlings = Bundling::latest()->get();
+
+        // 4. Kirim semua variabel ke view
+        return view('admin.categories.index', compact('categories', 'portfolios', 'bundlings'));
     }
 
     // 2. Simpan paket baru (Hanya Data Teks)
