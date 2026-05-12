@@ -1,4 +1,20 @@
-<nav x-data="{ openModal: false }" class="bg-white border-b border-gray-100 sticky top-0 z-50">
+@php
+    // Metode 'pull' akan mengambil pesan SEKALIGUS menghapusnya dari session saat itu juga.
+    // Jadi, jika halaman di-refresh atau diakses via 'Back', datanya sudah kosong (null).
+    $msgSukses = session()->pull('success_settings');
+@endphp
+
+<nav x-data="{ 
+    openModal: false, 
+    showSuccess: false
+}" 
+x-init="
+    @if($msgSukses)
+        // Gunakan timeout agar Alpine.js benar-benar siap merender modalnya
+        setTimeout(() => { showSuccess = true }, 100);
+    @endif
+"
+class="bg-white border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             
@@ -28,6 +44,7 @@
         </div>
     </div>
 
+    <!-- MODAL PENGATURAN AKUN -->
     <div x-show="openModal" 
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -36,14 +53,12 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @keydown.escape.window="openModal = false"
-         /* PERBAIKAN: Tambah overflow-y-auto dan ganti items-center jadi items-start */
          class="fixed inset-0 z-[100] flex justify-center items-start overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-sm" 
          style="display: none;"
          x-cloak>
         
         <div class="absolute inset-0" @click="openModal = false"></div>
         
-        /* PERBAIKAN: Tambah my-auto agar tetap center jika konten pendek, tapi bisa scroll jika panjang */
         <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl border border-pink-50 relative transform transition-all my-auto">
             
             <button @click="openModal = false" class="absolute top-6 right-6 w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400 rounded-full hover:bg-rose-50 hover:text-rose-500 transition-all">
@@ -64,24 +79,13 @@
 
             <hr class="border-gray-50 mb-6">
 
-            <div class="mb-8">
-                @if(session('success'))
-                    <div class="mb-4 p-3 bg-emerald-500 text-white text-[10px] font-bold rounded-xl shadow-lg">
-                        {{ session('success') }}
-                    </div>
-                @endif
+            <!-- FORM GABUNGAN (FOTO & PENGATURAN) -->
+            <form action="{{ route('admin.profile.full_update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                @csrf 
+                @method('PATCH')
 
-                @if ($errors->any())
-                    <div class="mb-4 p-3 bg-rose-500 text-white text-[10px] font-bold rounded-xl shadow-lg">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-                <form action="{{ route('admin.profile.update_photo') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                    @csrf
+                {{-- Bagian Upload Foto --}}
+                <div class="space-y-4">
                     <label class="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Foto Branding MUA (Halaman Depan)</label>
                     
                     <div class="bg-gray-50 p-4 rounded-3xl border border-gray-100 text-center">
@@ -94,17 +98,9 @@
                         </div>
                         <input type="file" name="profile_photo" class="w-full text-[9px] text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[9px] file:font-black file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 cursor-pointer">
                     </div>
+                </div>
 
-                    <button type="submit" class="w-full bg-slate-900 text-white font-black py-3 rounded-2xl shadow-lg uppercase text-[9px] tracking-widest hover:bg-pink-600 transition-all">
-                        Update Foto Branding
-                    </button>
-                </form>
-            </div>
-
-            <hr class="border-gray-50 mb-6">
-
-            <form action="{{ route('admin.profile.settings.update') }}" method="POST" class="space-y-6">
-                @csrf @method('PATCH')
+                {{-- Bagian Notifikasi --}}
                 <div class="bg-gray-50 p-5 rounded-3xl border border-gray-100">
                     <label class="block text-[9px] font-black text-gray-400 uppercase mb-3 ml-1 tracking-[0.2em]">Notifikasi Pengingat Jadwal</label>
                     <div class="flex items-center gap-3">
@@ -119,16 +115,34 @@
                 </button>
             </form> 
 
-            <a href="{{ route('admin.test.reminder') }}" class="w-full block text-center bg-blue-500 text-white font-black py-4 rounded-2xl hover:bg-blue-600 transition-all uppercase text-[10px] tracking-widest mt-6 mb-2">
-                🚀 Test Kirim Email Sekarang
-            </a>
-
-            <form method="POST" action="{{ route('logout') }}" class="mt-2">
+            <form method="POST" action="{{ route('logout') }}" class="mt-4 border-t border-gray-50 pt-4">
                 @csrf
                 <button type="submit" class="w-full bg-rose-50 text-rose-600 font-black py-4 rounded-2xl hover:bg-rose-600 hover:text-white transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-power-off"></i> Logout
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL STATUS BERHASIL (EMERALD STYLE) -->
+    <div x-show="showSuccess" 
+         x-cloak
+         class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100">
+        <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-10 shadow-2xl text-center border-4 border-emerald-50">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-check-double text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-900 uppercase italic tracking-tighter mb-2">Tersimpan!</h3>
+            <p class="text-sm text-gray-500 mb-8 leading-relaxed">
+                {{ $msgSukses }}
+            </p>
+            <button @click="showSuccess = false" 
+                    class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-pink-600 transition-all shadow-lg active:scale-95">
+                Oke, Siap
+            </button>
         </div>
     </div>
 </nav>

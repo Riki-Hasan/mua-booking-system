@@ -17,13 +17,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Models\Portfolio;
 
 // --- SISI CLIENT (PUBLIK) ---
-Route::get('/', function () {
-    return view('welcome', [
-        'categories' => Category::all(),
-        'portfolios' => Portfolio::with('category')->latest()->get(),
-        'bundlings' => \App\Models\Bundling::where('is_active', true)->get()
-    ]);
-});
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 // --- SISTEM BOOKING ---
 Route::get('/booking/{category_id}', [BookingController::class, 'create'])->name('booking.create');
@@ -79,7 +73,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::delete('/portfolios/{id}', [App\Http\Controllers\Admin\CategoryController::class, 'destroyPortfolio'])->name('portfolios.destroy');
     Route::patch('/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings.update');
     Route::post('/schedules/toggle-holiday', [ScheduleController::class, 'toggleHoliday'])->name('schedules.toggle_holiday');
-    Route::get('/test-reminder', [DashboardController::class, 'testReminder'])->name('test.reminder');
+    // Route::get('/test-reminder', [DashboardController::class, 'testReminder'])->name('test.reminder');
     //midtrans schedule
     Route::post('/schedules/prepare-payment', [ScheduleController::class, 'preparePayment'])->name('schedules.prepare');
 
@@ -92,6 +86,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     // routes/web.php (Pastikan di dalam group admin)
     Route::put('/bundlings/{id}', [ScheduleController::class, 'updateBundling'])->name('bundlings.update');
+
+    Route::post('/categories/update-order', [CategoryController::class, 'updateOrder'])->name('categories.update_order');
+    Route::post('/kebayas', [CategoryController::class, 'storeKebaya'])->name('kebayas.store');
+    Route::delete('/kebayas/{id}', [CategoryController::class, 'destroyKebaya'])->name('kebayas.destroy');
+    Route::patch('/profile/full-update', [ScheduleController::class, 'updateAllSettings'])->name('profile.full_update');
 });
 
 // Redirect Breeze Default Dashboard ke Admin Dashboard

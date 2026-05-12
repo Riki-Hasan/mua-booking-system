@@ -95,7 +95,7 @@
                         <div class="absolute top-0 right-0 w-32 h-32 bg-pink-600/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                         <div class="summary-parent relative z-[10]">
                             <div class="s-div1 border-b border-white/5 pb-4 mb-2"><span class="text-[10px] font-black text-pink-500 italic uppercase">Ringkasan Biaya</span></div>
-                            <div class="s-div2 flex flex-col gap-2 text-[10px] font-bold text-gray-500 uppercase"><p>Subtotal Paket</p><p>Jumlah Orang</p><p>Ongkir Lokasi</p><p class="text-white font-black mt-2">Total Estimasi</p></div>
+                            <div class="s-div2 flex flex-col gap-2 text-[10px] font-bold text-gray-500 uppercase"><p>Harga Paket</p><p>Jumlah Orang</p><p>Ongkir Lokasi</p><p class="text-white font-black mt-2">Total Estimasi</p></div>
                             <div class="s-div3 flex flex-col gap-2 text-[10px] font-black text-right text-white"><p id="display_subtotal">Rp{{ number_format($category->base_price, 0, ',', '.') }}</p><p id="display_multiplier" class="text-pink-500 italic">X1</p><p id="display_extra" class="text-pink-500">Rp0</p><p class="text-2xl text-pink-500 italic mt-1.5 font-black">Rp<span id="display_total">0</span></p></div>
                             
                             <div class="s-div4 pt-6 mt-4 border-t border-white/5">
@@ -207,9 +207,8 @@
             document.getElementById('display_multiplier').innerText = 'X' + persons;
             document.getElementById('display_extra').innerText = 'Rp' + extra.toLocaleString('id-ID');
             
-            // Subtotal sekarang dinamis berdasarkan calculatedPrice (bukan base asli lagi)
-            document.getElementById('display_subtotal').innerText = 'Rp' + calculatedPrice.toLocaleString('id-ID');
-            
+            // Tampilkan harga paket satuan (base), BUKAN calculatedPrice
+            document.getElementById('display_subtotal').innerText = 'Rp' + base.toLocaleString('id-ID');
             document.getElementById('display_total').innerText = total.toLocaleString('id-ID');
             document.getElementById('display_full').innerText = 'Rp' + total.toLocaleString('id-ID');
             document.getElementById('display_dp').innerText = 'Rp' + dp.toLocaleString('id-ID');

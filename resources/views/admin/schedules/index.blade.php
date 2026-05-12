@@ -96,11 +96,28 @@
                                 <div class="absolute top-0 right-0 w-32 h-32 bg-pink-600/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                                 <div class="summary-parent">
                                     <div class="s-div1 border-b border-white/5 pb-4 mb-2"><span class="text-[10px] font-black text-pink-500 italic uppercase">Ringkasan Biaya</span></div>
-                                    <div class="s-div2 flex flex-col gap-2 text-[10px] font-bold text-gray-500 uppercase"><p>Subtotal</p><p>Jumlah Orang</p><p class="text-white font-black mt-2">Total</p></div>
-                                    <div class="s-div3 flex flex-col gap-2 text-[10px] font-black text-right text-white"><p id="display_subtotal">Rp0</p><p id="display_multiplier" class="text-pink-500">X1</p><p class="text-xl text-pink-500 italic mt-1.5">Rp<span id="display_total">0</span></p></div>
-                                    <div class="s-div4 pt-6"><label class="block mb-2 font-black text-[9px] uppercase text-gray-500">Metode</label>
-                                        <select name="payment_method" id="payMethod" onchange="togglePaymentInput()" class="p-3 bg-white/5 border-white/10 text-white text-xs uppercase outline-none rounded-xl w-full"><option value="cash" class="bg-slate-900">Tunai (Cash)</option><option value="qris" class="bg-slate-900">QRIS / Transfer</option></select>
+                                    
+                                    <div class="s-div2 flex flex-col gap-2 text-[10px] font-bold text-gray-500 uppercase">
+                                        <p>Subtotal</p>
+                                        <p>Jumlah Orang</p>
+                                        <p class="text-white font-black mt-2">Ongkir</p>
+                                        <p class="text-white font-black mt-2">Total</p>
                                     </div>
+                                    
+                                    <div class="s-div3 flex flex-col gap-2 text-[10px] font-black text-right text-white">
+                                        <p id="display_subtotal">Rp0</p>
+                                        <p id="display_multiplier" class="text-pink-500">X1</p>
+                                        <p id="display_ongkir" class="text-pink-500 mt-2">Rp0</p>
+                                        <p class="text-xl text-pink-500 italic mt-1.5">Rp<span id="display_total">0</span></p>
+                                    </div>
+                                    
+                                    <div class="s-div4 pt-6"><label class="block mb-2 font-black text-[9px] uppercase text-gray-500">Metode</label>
+                                        <select name="payment_method" id="payMethod" onchange="togglePaymentInput()" class="p-3 bg-white/5 border-white/10 text-white text-xs uppercase outline-none rounded-xl w-full">
+                                            <option value="cash" class="bg-slate-900">Tunai (Cash)</option>
+                                            <option value="qris" class="bg-slate-900">QRIS / Transfer</option>
+                                        </select>
+                                    </div>
+                                    
                                     <div class="s-div5 pt-6" id="payment_input_area"></div>
                                 </div>
                             </div>
@@ -347,19 +364,34 @@
 
         // 3. UPDATE HARGA & LIMIT ORANG
         function updateTotal() {
-            const sOpt = document.getElementById('category_select').selectedOptions[0], lOpt = document.getElementById('location_select').selectedOptions[0];
-            let persons = parseInt(document.getElementById('person_count').value) || 1;
-            if (persons > 2) { 
-                showStatusModal("Maksimal pemesanan offline adalah 2 orang."); 
-                document.getElementById('person_count').value = 2; persons = 2; 
-            }
-            const sPrice = parseInt(sOpt.dataset.price) || 0, lPrice = parseInt(lOpt.dataset.price) || 0;
-            totalVal = (sPrice * persons) + lPrice;
-            document.getElementById('display_subtotal').innerText = 'Rp' + new Intl.NumberFormat('id-ID').format(sPrice);
-            document.getElementById('display_multiplier').innerText = 'X' + persons;
-            document.getElementById('display_total').innerText = new Intl.NumberFormat('id-ID').format(totalVal);
-            togglePaymentInput();
+        const sOpt = document.getElementById('category_select').selectedOptions[0];
+        const lOpt = document.getElementById('location_select').selectedOptions[0];
+        
+        let persons = parseInt(document.getElementById('person_count').value) || 1;
+        
+        if (persons > 2) { 
+            showStatusModal("Maksimal pemesanan offline adalah 2 orang."); 
+            document.getElementById('person_count').value = 2; 
+            persons = 2; 
         }
+        
+        const sPrice = parseInt(sOpt.dataset.price) || 0;
+        const lPrice = parseInt(lOpt.dataset.price) || 0;
+        
+        // Perhitungan Total
+        totalVal = (sPrice * persons) + lPrice;
+        
+        // Lempar ke HTML
+        document.getElementById('display_subtotal').innerText = 'Rp' + new Intl.NumberFormat('id-ID').format(sPrice);
+        document.getElementById('display_multiplier').innerText = 'X' + persons;
+        
+        // PERBAIKAN: Gunakan lPrice untuk menampilkan nominal ongkir murni
+        document.getElementById('display_ongkir').innerText = 'Rp' + new Intl.NumberFormat('id-ID').format(lPrice);
+        
+        document.getElementById('display_total').innerText = new Intl.NumberFormat('id-ID').format(totalVal);
+        
+        togglePaymentInput();
+    }
 
         function togglePaymentInput() {
             const method = document.getElementById('payMethod').value, area = document.getElementById('payment_input_area');
@@ -391,11 +423,16 @@
                     const btn = document.createElement('button'); btn.type = "button"; btn.innerText = i;
                     btn.className = "day-btn p-3 bg-gray-50 text-gray-800 transition-all";
                     const dateToCheck = new Date(curYear, curMonth, i);
-                    if (dateToCheck < today) { btn.disabled = true; btn.classList.add('before-today'); } 
-                    else {
+                    if (dateToCheck < today) { 
+                        btn.disabled = true; btn.classList.add('before-today'); 
+                    } else {
                         if (availability[i]) {
-                            if (availability[i].status === 'holiday') btn.classList.add('holiday-active');
-                            else btn.classList.add('booking-partial');
+                            // REVISI: Holiday atau Full (24 jam) tampil Merah
+                            if (availability[i].status === 'holiday' || availability[i].status === 'full') {
+                                btn.classList.add('holiday-active'); 
+                            } else {
+                                btn.classList.add('booking-partial'); // Kuning
+                            }
                         }
                         btn.onclick = (e) => selectDate(i, availability[i]?.details || [], e.target, availability[i]?.status === 'holiday');
                     }

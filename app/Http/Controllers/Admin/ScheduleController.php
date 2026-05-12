@@ -35,7 +35,6 @@ class ScheduleController extends Controller
 
     public function preparePayment(Request $request)
     {
-        // Paksa validasi di sini
         if (!$request->start_time || !$request->booking_date) {
             return response()->json(['status' => 'error', 'message' => 'Tanggal atau Jam belum dipilih!'], 422);
         }
@@ -48,13 +47,12 @@ class ScheduleController extends Controller
         $endTime = Carbon::parse($startTime)->addMinutes($actualDuration)->format('H:i');
         $formattedDate = Carbon::parse($request->booking_date)->format('Y-m-d');
 
-        // Query Bentrok yang lebih aman
         $isClash = Booking::where('booking_date', $formattedDate)
-            ->whereIn('status', ['confirmed', 'paid_dp', 'paid_full'])
-            ->where(function($q) use ($startTime, $endTime) {
-                $q->where('start_time', '<', $endTime)
-                  ->where('end_time', '>', $startTime);
-            })->exists();
+        ->whereIn('status', ['confirmed', 'paid_dp', 'paid_full', 'pending', 'success']) // Tambahkan pending & success
+        ->where(function($q) use ($startTime, $endTime) {
+            $q->where('start_time', '<', $endTime)
+            ->where('end_time', '>', $startTime);
+        })->exists();
 
         if ($isClash) {
             return response()->json(['status' => 'error', 'message' => 'Maaf, jam tersebut sudah terisi jadwal lain!'], 422);
@@ -81,9 +79,8 @@ class ScheduleController extends Controller
 
     public function storeManual(Request $request)
     {
-        // Pastikan start_time ada
         if (!$request->start_time) {
-            return response()->json(['status' => 'error', 'message' => 'Data jam (start_time) hilang!'], 422);
+            return response()->json(['status' => 'error', 'message' => 'Data jam hilang!'], 422);
         }
 
         $category = Category::findOrFail($request->category_id);
@@ -95,6 +92,19 @@ class ScheduleController extends Controller
         $startTime = $request->start_time;
         $endTime = Carbon::parse($startTime)->addMinutes($actualDuration)->format('H:i');
         $formattedDate = Carbon::parse($request->booking_date)->format('Y-m-d');
+
+        // --- CEK BENTROK JADWAL ---
+        $isClash = Booking::where('booking_date', $formattedDate)
+        ->whereIn('status', ['confirmed', 'paid_dp', 'paid_full', 'pending', 'success']) // Tambahkan pending & success
+        ->where(function($q) use ($startTime, $endTime) {
+            $q->where('start_time', '<', $endTime)
+            ->where('end_time', '>', $startTime);
+        })->exists();
+
+        if ($isClash) {
+            return response()->json(['status' => 'error', 'message' => 'Gagal! Jam tersebut sudah terisi jadwal lain.'], 422);
+        }
+        // --- END CEK BENTROK ---
 
         $totalAmount = ($category->base_price * $request->person_count) + ($location->additional_price ?? 0);
         $dpPaid = $request->dp_amount ?? 0;
@@ -123,8 +133,6 @@ class ScheduleController extends Controller
     public function toggleHoliday(Request $request)
     {
         $date = $request->date;
-
-        // Cek booking aktif
         $hasBooking = Booking::whereDate('booking_date', $date)
             ->whereIn('status', ['confirmed', 'paid_dp', 'paid_full', 'success'])
             ->exists();
@@ -143,29 +151,54 @@ class ScheduleController extends Controller
         }
     }
 
-
-    // 1. Update Foto Profil Branding
-    public function updateProfilePhoto(Request $request)
+    public function updateAllSettings(Request $request)
     {
         $request->validate([
-            'profile_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'reminder_days' => 'required|numeric|min:1|max:30',
         ]);
 
         $user = auth()->user();
 
-        // Hapus foto lama jika ada
-        if ($user->profile_photo_path) {
-            Storage::disk('public')->delete($user->profile_photo_path);
+        // 1. Update Foto jika ada file baru
+        if ($request->hasFile('profile_photo')) {
+            if ($user->profile_photo_path) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $user->profile_photo_path = $path;
         }
 
-        // Simpan foto baru
-        $path = $request->file('profile_photo')->store('profile-photos', 'public');
-        $user->update(['profile_photo_path' => $path]);
+        // 2. Update Pengaturan Hari Reminder
+        $user->reminder_days = $request->reminder_days;
+        $user->save();
 
-        return back()->with('success', 'Foto branding berhasil diperbarui!');
+        // Kembalikan ke halaman sebelumnya dengan session success untuk memicu modal
+        return back()->with('success_settings', 'Pengaturan akun dan foto branding berhasil diperbarui!');
     }
 
-    // 2. Simpan Promo Bundling Baru
+   public function destroyBundling(Request $request, $id)
+    {
+        $bundling = \App\Models\Bundling::findOrFail($id);
+        
+        // Hapus file fisik agar tidak memenuhi storage
+        \Illuminate\Support\Facades\Storage::disk('public')->delete([
+            $bundling->main_image, 
+            $bundling->secondary_image
+        ]);
+        
+        $bundling->delete();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Promo bundling berhasil dihapus!'
+            ]);
+        }
+
+        return back()->with('success_delete', 'Promo berhasil dihapus.');
+    }
+
     public function storeBundling(Request $request)
     {
         $request->validate([
@@ -179,7 +212,6 @@ class ScheduleController extends Controller
             'target_person_count' => 'required|numeric',
         ]);
 
-        // Simpan Gambar
         $mainPath = $request->file('main_image')->store('bundlings', 'public');
         $secondaryPath = $request->file('secondary_image')->store('bundlings', 'public');
 
@@ -195,22 +227,15 @@ class ScheduleController extends Controller
             'target_person_count' => $request->target_person_count,
         ]);
 
-        return back()->with('success', 'Promo Bundling berhasil ditambahkan!');
-    }
-
-    // 3. Hapus Bundling
-    public function destroyBundling($id)
-    {
-        $bundling = Bundling::findOrFail($id);
-        Storage::disk('public')->delete([$bundling->main_image, $bundling->secondary_image]);
-        $bundling->delete();
-
-        return back()->with('success_delete', 'Promo berhasil dihapus.');
+        return back()->with([
+            'success_edit' => 'Promo Bundling berhasil ditambahkan!',
+            'current_tab' => $request->current_tab
+        ]);
     }
 
     public function updateBundling(Request $request, $id)
     {
-        $bundling = \App\Models\Bundling::findOrFail($id);
+        $bundling = Bundling::findOrFail($id);
         
         $request->validate([
             'subject' => 'required|string',
@@ -220,7 +245,7 @@ class ScheduleController extends Controller
             'main_image' => 'nullable|image|max:2048',
             'secondary_image' => 'nullable|image|max:2048',
             'duration_minutes' => 'required|numeric',
-        'target_person_count' => 'required|numeric',
+            'target_person_count' => 'required|numeric',
         ]);
 
         $data = [
@@ -228,18 +253,16 @@ class ScheduleController extends Controller
             'price' => $request->price,
             'short_description' => $request->short_description,
             'description' => $request->description,
-            'duration_minutes' => $request->duration_minutes,
-        'target_person_count' => $request->target_person_count,
             'include_text' => $request->short_description,
+            'duration_minutes' => $request->duration_minutes,
+            'target_person_count' => $request->target_person_count,
         ];
 
-        // Cek jika ada upload Foto Utama baru
         if ($request->hasFile('main_image')) {
             Storage::disk('public')->delete($bundling->main_image);
             $data['main_image'] = $request->file('main_image')->store('bundlings', 'public');
         }
 
-        // Cek jika ada upload Foto Kecil baru
         if ($request->hasFile('secondary_image')) {
             Storage::disk('public')->delete($bundling->secondary_image);
             $data['secondary_image'] = $request->file('secondary_image')->store('bundlings', 'public');
@@ -247,6 +270,16 @@ class ScheduleController extends Controller
 
         $bundling->update($data);
 
-        return back()->with('success_edit', 'Promo Bundling berhasil diperbarui!');
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Promo ' . $bundling->subject . ' berhasil diperbarui!'
+            ]);
+        }
+
+        return back()->with([
+            'success_edit' => 'Promo Bundling berhasil diperbarui!',
+            'current_tab' => $request->current_tab
+        ]);
     }
 }

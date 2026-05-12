@@ -2,6 +2,9 @@
     <style>
         [x-cloak] { display: none !important; }
         .back-btn-content { display: flex; align-items: center; gap: 0.5rem; }
+        .animate-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
         @media (max-width: 768px) {
             .mobile-card-grid { display: block; }
             .desktop-table { display: none; }
@@ -15,8 +18,6 @@
                 <h2 class="font-bold text-xl md:text-2xl text-pink-600 leading-tight italic">
                     Verifikasi Pesanan
                 </h2>
-                
-                
             </div>
 
             <div class="flex items-center gap-3 w-full md:w-auto">
@@ -34,14 +35,17 @@
         </div>
     </x-slot>
 
-    <div class="py-6 md:py-12 bg-slate-50 min-h-screen" x-data="{ openDeleteModal: false, deleteUrl: '', customerName: '' }">
+    {{-- REVISI: Tambahkan openStatusModal pada x-data --}}
+    <div class="py-6 md:py-12 bg-slate-50 min-h-screen" 
+         x-data="{ 
+            openDeleteModal: false, 
+            deleteUrl: '', 
+            customerName: '',
+            openStatusModal: {{ session('success') ? 'true' : 'false' }} 
+         }">
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            @if(session('success'))
-                <div class="mb-6 p-4 bg-emerald-500 text-white rounded-2xl font-bold text-sm shadow-lg shadow-emerald-200 animate-pulse">
-                    <i class="fa-solid fa-circle-check mr-2"></i> {{ session('success') }}
-                </div>
-            @endif
+            {{-- Alert box lama dihapus untuk digantikan Modal Status di bawah --}}
 
             <div class="desktop-table bg-white rounded-[2.5rem] shadow-sm border border-pink-50 overflow-hidden">
                 <table class="w-full text-left border-collapse">
@@ -62,7 +66,6 @@
                             $tglIndo = \Carbon\Carbon::parse($order->booking_date)->translatedFormat('d F Y');
                             $statusIndo = ($order->status == 'paid_full') ? "Lunas" : (($order->status == 'paid_dp') ? "DP Terbayar" : "Dikonfirmasi");
                             
-                            // REVISI 5: Chat Template Friendly
                             $message = "Halo Kak *" . $order->customer_name . "*! ✨ Kabar gembira nih, pesanan rias Kakak untuk *" . $order->person_count . " orang* sudah dikonfirmasi ya. 😍\n\nRencananya kita ketemu di:\n📍 *Alamat:* " . $order->address . "\n📅 *Tanggal:* " . $tglIndo . "\n⏰ *Jam:* " . $order->start_time . " WIB\n\nStatus: *" . $statusIndo . "* ✅\n\nSampai ketemu di hari H ya Kak! Jika ada pertanyaan langsung balas chat ini saja. Terima kasih! ❤️";
                             $waUrl = "https://wa.me/" . $phone . "?text=" . urlencode($message);
                         @endphp
@@ -128,9 +131,6 @@
                         <div class="flex items-center text-xs font-bold text-gray-600">
                             <i class="fa-solid fa-wand-sparkles mr-2 text-pink-300"></i> 
                             {{ $order->category->name ?? $order->bundling->subject ?? 'Paket/Promo' }} ({{ $order->person_count }} Org)
-                            @if($order->bundling_id)
-                                <span class="ml-2 text-[7px] bg-rose-50 text-rose-500 px-1.5 py-0.5 rounded-md font-black uppercase">Promo</span>
-                            @endif
                         </div>
                         <div class="flex items-center text-xs font-bold text-gray-400"><i class="fa-solid fa-calendar-day mr-2 text-pink-200"></i> {{ \Carbon\Carbon::parse($order->booking_date)->translatedFormat('d F Y') }}</div>
                         <div class="flex items-center text-xs font-bold text-gray-400"><i class="fa-solid fa-clock mr-2 text-pink-200"></i> {{ $order->start_time }} WIB</div>
@@ -143,16 +143,16 @@
                 </div>
                 @endforeach
             </div>
-
         </div>
 
+        {{-- MODAL KONFIRMASI HAPUS --}}
         <div x-show="openDeleteModal" 
              x-cloak
              class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 scale-95"
              x-transition:enter-end="opacity-100 scale-100">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full mx-4 text-center border-4 border-rose-50">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full mx-4 text-center border-4 border-rose-50 animate-pop">
                 <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
                     <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
                 </div>
@@ -169,6 +169,28 @@
                         <button type="submit" class="w-full py-4 bg-rose-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-600 shadow-lg shadow-rose-200 transition-all active:scale-95">Ya, Hapus!</button>
                     </form>
                 </div>
+            </div>
+        </div>
+
+        {{-- REVISI: MODAL STATUS BERHASIL --}}
+        <div x-show="openStatusModal" 
+             x-cloak
+             class="fixed inset-0 z-[210] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100">
+            <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-10 shadow-2xl text-center border-4 border-emerald-50 animate-pop">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-check-double text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-black text-gray-900 uppercase italic tracking-tighter mb-2">Terhapus!</h3>
+                <p class="text-sm text-gray-500 mb-8 leading-relaxed">
+                    {{ session('success') }}
+                </p>
+                <button @click="openStatusModal = false" 
+                        class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-[0.2em] hover:bg-pink-600 transition-all shadow-lg active:scale-95">
+                    Oke, Mantap
+                </button>
             </div>
         </div>
     </div>

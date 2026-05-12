@@ -7,20 +7,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        select {
-            -webkit-appearance: none; -moz-appearance: none; appearance: none;
-            background: transparent; border: none; outline: none;
-            text-align: center; text-align-last: center; 
-            cursor: pointer; width: 100%;
-        }
-        .select-wrapper { position: relative; display: flex; align-items: center; }
-        .select-wrapper::after {
-            content: '▼'; font-size: 8px; position: absolute;
-            right: 15px; pointer-events: none; color: #9ca3af;
-        }
         .custom-scroll::-webkit-scrollbar { width: 3px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(236, 72, 153, 0.4); border-radius: 10px; }
-        select option { background-color: #0f172a; color: white; padding: 10px; }
         input[type="time"]::-webkit-calendar-picker-indicator {
             filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
             cursor: pointer; transform: scale(1.2);
@@ -51,30 +39,30 @@
     <div class="max-w-5xl mx-auto flex flex-col lg:flex-row bg-white rounded-3xl lg:rounded-[4rem] shadow-2xl overflow-hidden border border-pink-100">
         
         <div class="flex-1 p-6 md:p-12 lg:p-16 border-b lg:border-b-0 lg:border-r border-pink-50">
-            <div class="flex gap-2 md:gap-4 mb-6 md:mb-10">
-                <div class="flex-1 select-wrapper bg-gray-50 rounded-2xl border border-gray-100">
-                    <select id="monthSelect" class="p-3 md:p-4 text-[10px] md:text-xs font-black uppercase outline-none"></select>
+            
+            <div class="mb-8 md:mb-10 text-center relative">
+                <div class="flex justify-between items-center mb-2">
+                    <button type="button" id="prevMonth" class="bg-pink-50 hover:bg-pink-500 hover:text-white text-pink-500 px-4 py-3 rounded-2xl font-black text-[10px] uppercase transition-all hidden active:scale-95 border border-pink-100" onclick="changeMonth(-1)">
+                        &larr; Back
+                    </button>
+                    
+                    <h3 id="calendarTitle" class="text-2xl md:text-3xl font-black italic uppercase text-gray-900 tracking-tighter flex-1 text-center">
+                        Bulan Tahun
+                    </h3>
+                    
+                    <button type="button" id="nextMonthBtn" class="bg-pink-50 hover:bg-pink-500 hover:text-white text-pink-500 px-4 py-3 rounded-2xl font-black text-[10px] uppercase transition-all active:scale-95 border border-pink-100" onclick="changeMonth(1)">
+                        Next &rarr;
+                    </button>
                 </div>
-                <div class="w-24 md:w-32 select-wrapper bg-gray-50 rounded-2xl border border-gray-100">
-                    <select id="yearSelect" class="p-3 md:p-4 text-[10px] md:text-xs font-black uppercase outline-none"></select>
-                </div>
-            </div>
-
-            <div class="mb-6 md:mb-10">
-                <h3 id="calendarTitle" class="text-2xl md:text-3xl font-black italic uppercase text-gray-900 tracking-tighter">Bulan Tahun</h3>
-                <p class="text-[9px] md:text-[10px] font-black text-pink-500 uppercase tracking-widest mt-1 italic">Ketuk tanggal untuk memilih</p>
+                <p class="text-[9px] md:text-[10px] font-black text-pink-500 uppercase tracking-widest mt-1 italic">
+                    Ketuk tanggal untuk memilih
+                </p>
             </div>
 
             <div id="calendarGrid" class="grid grid-cols-7 gap-1 md:gap-3 text-center mb-8">
                 @foreach(['S','S','R','K','J','S','M'] as $hari)
                     <div class="text-[10px] font-black text-gray-400 mb-2">{{ $hari }}</div>
                 @endforeach
-            </div>
-
-            <div class="flex justify-center">
-                <button type="button" id="nextMonth" class="w-full md:w-auto bg-pink-50 text-pink-500 px-8 py-4 rounded-2xl flex items-center justify-center gap-3 font-black hover:bg-pink-500 hover:text-white transition-all border border-pink-100 shadow-sm text-[10px] uppercase tracking-widest active:scale-95">
-                    Bulan Berikutnya →
-                </button>
             </div>
         </div>
 
@@ -111,7 +99,6 @@
                                class="w-full bg-white/10 border border-white/20 rounded-2xl p-5 md:p-6 text-white text-3xl md:text-4xl font-black text-center focus:ring-4 focus:ring-pink-500/30 transition-all outline-none">
                     </div>
                         @php
-                            // Ambil jumlah orang dari URL, default 1
                             $persons = request('person_count', 1);
                             $multiplier = ($persons >= 2) ? 1.5 : 1.0;
                             $calculatedDuration = (int)($category->duration_minutes * $multiplier);
@@ -156,57 +143,55 @@
             $multiplier = ($persons >= 2) ? 1.5 : 1.0;
             $calculatedDuration = (int)($category->duration_minutes * $multiplier);
         @endphp
+        
         const serviceDuration = {{ $calculatedDuration }};
         const personCount = {{ $persons }};
         const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        let currentMonth = new Date().getMonth();
-        let currentYear = 2026;
+        
+        // Ambil bulan dan tahun dari waktu sekarang secara dinamis
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
 
-        function initSelectors() {
-            const mSelect = document.getElementById('monthSelect');
-            const ySelect = document.getElementById('yearSelect');
-            const now = new Date();
-
-            monthNames.forEach((m, i) => { mSelect.add(new Option(m, i)); });
-            [2026, 2027].forEach(y => ySelect.add(new Option(y, y)));
-            
-            mSelect.value = currentMonth;
-            ySelect.value = currentYear;
-            
-            const updateMonthStatus = () => {
-                const year = parseInt(ySelect.value);
-                Array.from(mSelect.options).forEach((opt, i) => {
-                    opt.disabled = (year === now.getFullYear() && i < now.getMonth());
-                });
-            };
-
-            updateMonthStatus();
-            mSelect.onchange = () => { currentMonth = parseInt(mSelect.value); renderCalendar(); };
-            ySelect.onchange = () => { currentYear = parseInt(ySelect.value); updateMonthStatus(); renderCalendar(); };
-            
-            document.getElementById('nextMonth').onclick = () => {
-                if(currentMonth < 11) { 
-                    currentMonth++; mSelect.value = currentMonth; renderCalendar(); 
-                } else if(currentYear === 2026) {
-                    currentYear = 2027; currentMonth = 0;
-                    ySelect.value = currentYear; mSelect.value = currentMonth;
-                    updateMonthStatus(); renderCalendar();
-                }
-            };
+        // FUNGSI GANTI BULAN BACK / NEXT
+        function changeMonth(step) {
+            currentMonth += step;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
         }
 
         async function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
             const now = new Date();
             now.setHours(0,0,0,0);
+            
+            // 1. Update Judul Bulan
             document.getElementById('calendarTitle').innerText = `${monthNames[currentMonth]} ${currentYear}`;
             
+            // 2. Sembunyikan tombol "Back" jika berada di bulan ini atau bulan sebelumnya
+            const prevBtn = document.getElementById('prevMonth');
+            if (currentYear < now.getFullYear() || (currentYear === now.getFullYear() && currentMonth <= now.getMonth())) {
+                prevBtn.classList.add('hidden');
+            } else {
+                prevBtn.classList.remove('hidden');
+            }
+            
+            // 3. Tarik Data Ketersediaan dari Server
             const response = await fetch(`/api/check-availability?month=${currentMonth + 1}&year=${currentYear}`);
             const availability = await response.json();
             
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Hapus tombol tanggal yang lama
             grid.querySelectorAll('.day-btn').forEach(b => b.remove());
 
+            // 4. Buat Ulang Grid Tanggal
             for (let i = 1; i <= daysInMonth; i++) {
                 const btn = document.createElement('button');
                 const dateToCheck = new Date(currentYear, currentMonth, i);
@@ -224,15 +209,15 @@
                         btn.onclick = () => showInfo(i, 'full', availability[i].details);
                     } else if (availability[i].status === 'holiday') {
                         btn.classList.add('holiday-active');
-                        btn.disabled = true; // MATIKAN KLIK UNTUK CUSTOMER
+                        btn.disabled = true;
                         btn.title = "Maaf, hari ini kami libur";
                         btn.onclick = null;
-                    }else {
+                    } else {
                         btn.className += "bg-amber-400 text-white";
                         btn.onclick = () => showInfo(i, 'partial', availability[i].details);
                     }
                 } else {
-                    btn.className += "bg-slate-100 text-slate-800 hover:bg-pink-500 hover:text-white";
+                    btn.className += "bg-slate-100 text-slate-800 hover:bg-pink-500 hover:text-white border border-transparent";
                     btn.onclick = () => showInfo(i, 'free', []);
                 }
                 grid.appendChild(btn);
@@ -294,44 +279,41 @@
         }
 
         function confirmSelection() {
-                const timeInput = document.getElementById('timeValue').value;
-                if (!selectedDay || !timeInput) {
-                    alert("Pilih tanggal dan jam rias terlebih dahulu!");
-                    return;
-                }
-
-                const [h, m] = timeInput.split(':').map(Number);
-                const userStart = h * 60 + m;
-                const userEnd = userStart + serviceDuration;
-
-                let clashingRecord = null;
-                dayBookings.forEach(booking => {
-                    const [bhS, bmS] = booking.start.split(':').map(Number);
-                    const [bhE, bmE] = booking.end.split(':').map(Number);
-                    const existingStart = bhS * 60 + bmS;
-                    const existingEnd = bhE * 60 + bmE;
-
-                    if (userStart < existingEnd && existingStart < userEnd) {
-                        clashingRecord = booking;
-                    }
-                });
-
-                if (clashingRecord) {
-                    openClashModal(clashingRecord);
-                    return;
-                }
-
-                const dateStr = `${selectedDay}-${monthNames[currentMonth]}-${currentYear}`;
-                
-                // REVISI: Mengirim kembali person_count ke halaman create agar input tidak reset
-                window.location.href = `{{ route('booking.create', $category->id) }}?date=${dateStr}&time=${timeInput}&person_count=${personCount}`;
+            const timeInput = document.getElementById('timeValue').value;
+            if (!selectedDay || !timeInput) {
+                alert("Pilih tanggal dan jam rias terlebih dahulu!");
+                return;
             }
 
-            // Jalankan inisialisasi
-            document.addEventListener('DOMContentLoaded', () => {
-                initSelectors();
-                renderCalendar();
+            const [h, m] = timeInput.split(':').map(Number);
+            const userStart = h * 60 + m;
+            const userEnd = userStart + serviceDuration;
+
+            let clashingRecord = null;
+            dayBookings.forEach(booking => {
+                const [bhS, bmS] = booking.start.split(':').map(Number);
+                const [bhE, bmE] = booking.end.split(':').map(Number);
+                const existingStart = bhS * 60 + bmS;
+                const existingEnd = bhE * 60 + bmE;
+
+                if (userStart < existingEnd && existingStart < userEnd) {
+                    clashingRecord = booking;
+                }
             });
+
+            if (clashingRecord) {
+                openClashModal(clashingRecord);
+                return;
+            }
+
+            const dateStr = `${selectedDay}-${monthNames[currentMonth]}-${currentYear}`;
+            window.location.href = `{{ route('booking.create', $category->id) }}?date=${dateStr}&time=${timeInput}&person_count=${personCount}`;
+        }
+
+        // Jalankan kalender saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCalendar();
+        });
     </script>
 </body>
 </html>

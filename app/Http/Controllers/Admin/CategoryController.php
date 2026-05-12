@@ -4,32 +4,25 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Models\Portfolio; // Import Model Portfolio
+use App\Models\Portfolio;
+use App\Models\Bundling;
+use App\Models\Kebaya;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Exception;
-use App\Models\Bundling;
-
 
 class CategoryController extends Controller
 {
-    // 1. Menampilkan daftar paket
     public function index()
     {
-        // 1. Ambil data kategori (data lama)
         $categories = Category::all();
-        
-        // 2. Ambil data portfolio (data lama)
         $portfolios = Portfolio::with('category')->latest()->get();
-
-        // 3. AMBIL DATA BUNDLING (Data Baru untuk memperbaiki error)
         $bundlings = Bundling::latest()->get();
+        $kebayas = Kebaya::latest()->get();
 
-        // 4. Kirim semua variabel ke view
-        return view('admin.categories.index', compact('categories', 'portfolios', 'bundlings'));
+        return view('admin.categories.index', compact('categories', 'portfolios', 'bundlings', 'kebayas'));
     }
 
-    // 2. Simpan paket baru (Hanya Data Teks)
     public function store(Request $request)
     {
         $request->validate([
@@ -44,26 +37,12 @@ class CategoryController extends Controller
             'duration_minutes' => $request->duration_minutes,
         ]);
 
-        return back()->with('success_edit', 'Paket baru berhasil ditambahkan!');
-    }
-
-    // 3. Update data paket (Teks saja)
-    public function update(Request $request, $id)
-    {
-        $category = Category::findOrFail($id);
-        
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'base_price' => 'required|numeric',
-            'duration_minutes' => 'required|numeric',
+        return back()->with([
+            'success_edit' => 'Paket baru berhasil ditambahkan!',
+            'current_tab' => $request->current_tab
         ]);
-
-        $category->update($request->only(['name', 'base_price', 'duration_minutes']));
-
-        return back()->with('success_edit', 'Data paket ' . $category->name . ' berhasil diperbarui!');
     }
 
-    // 4. Tambah Foto ke Gallery (Tabel Portfolios)
     public function updateImage(Request $request)
     {
         $request->validate([
@@ -72,54 +51,123 @@ class CategoryController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Simpan file ke folder portfolio
             $path = $request->file('image')->store('portfolio', 'public');
-            
-            // Masukkan data ke tabel portfolios
             Portfolio::create([
                 'category_id' => $request->category_id,
                 'image_path' => $path
             ]);
         }
 
-        return back()->with('success_edit', 'Foto berhasil ditambahkan ke gallery!');
+        return back()->with([
+            'success_edit' => 'Foto berhasil ditambahkan ke gallery!',
+            'current_tab' => $request->current_tab
+        ]);
     }
 
-    // 5. Hapus Foto Portfolio secara spesifik
-    // Method untuk menghapus foto portfolio secara spesifik
-    public function destroyPortfolio($id)
+    public function updateOrder(Request $request)
     {
-        $photo = \App\Models\Portfolio::findOrFail($id);
-        
-        // Hapus file fisik dari storage agar tidak menumpuk
-        if ($photo->image_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($photo->image_path);
+        $ids = $request->ids;
+        foreach ($ids as $index => $id) {
+            Category::where('id', $id)->update([
+                'sort_order' => $index + 1
+            ]);
         }
-        
-        $photo->delete();
-        
-        return back()->with('success_delete', 'Foto portfolio berhasil dihapus!');
+        return response()->json(['status' => 'success', 'message' => 'Urutan berhasil diperbarui!']);
     }
 
-    // 6. Hapus Paket (Dengan Proteksi Foreign Key)
-    public function destroy($id)
+    public function storeKebaya(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'image' => 'required|image|max:2048',
+        ]);
+
+        $path = $request->file('image')->store('kebayas', 'public');
+
+        Kebaya::create([
+            'name' => $request->name,
+            'image_path' => $path
+        ]);
+
+        return back()->with([
+            'success_edit' => 'Koleksi Kebaya berhasil ditambahkan!',
+            'current_tab' => 'kebaya'
+        ]);
+    }
+
+    public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
-
+        
         try {
-            // Sebelum hapus kategori, hapus semua file foto terkait di storage
-            foreach ($category->portfolios as $portfolio) {
-                Storage::disk('public')->delete($portfolio->image_path);
+            $request->validate([
+                'name' => 'required|string|max:255', 
+                'base_price' => 'required|numeric', 
+                'duration_minutes' => 'required|numeric'
+            ]);
+            
+            $category->update($request->only(['name', 'base_price', 'duration_minutes']));
+
+            if ($request->ajax()) {
+                return response()->json(['status' => 'success', 'message' => 'Data paket berhasil diperbarui!']);
             }
+            return back()->with(['success_edit' => 'Data paket berhasil diperbarui!', 'current_tab' => $request->current_tab]);
+            
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Gagal: ' . $e->getMessage()], 422);
+            }
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
 
-            // Hapus kategori (Otomatis data di tabel portfolios terhapus jika pakai cascade)
+    public function destroyPortfolio(Request $request, $id)
+    {
+        $photo = Portfolio::findOrFail($id);
+        if ($photo->image_path) { 
+            Storage::disk('public')->delete($photo->image_path); 
+        }
+        $photo->delete();
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'success', 'message' => 'Foto berhasil dihapus!']);
+        }
+        return back()->with(['success_delete' => 'Foto portfolio berhasil dihapus!', 'current_tab' => $request->current_tab]);
+    }
+
+    public function destroyKebaya(Request $request, $id)
+    {
+        $kebaya = Kebaya::findOrFail($id);
+        if ($kebaya->image_path) { 
+            Storage::disk('public')->delete($kebaya->image_path); 
+        }
+        $kebaya->delete();
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'success', 'message' => 'Koleksi Kebaya berhasil dihapus!']);
+        }
+        return back()->with(['success_delete' => 'Kebaya berhasil dihapus!', 'current_tab' => $request->current_tab]);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $category = Category::findOrFail($id);
+        try {
+            foreach ($category->portfolios as $portfolio) { 
+                Storage::disk('public')->delete($portfolio->image_path); 
+            }
             $category->delete();
-
-            return back()->with('success_delete', 'Paket berhasil dihapus secara permanen.');
-
+            
+            if ($request->ajax()) {
+                return response()->json(['status' => 'success', 'message' => 'Paket berhasil dihapus secara permanen.']);
+            }
+            return back()->with(['success_delete' => 'Paket berhasil dihapus.', 'current_tab' => $request->current_tab]);
+            
         } catch (Exception $e) {
-            // Jika gagal karena Foreign Key (ada di tabel bookings)
-            return back()->with('error_delete', 'Gagal menghapus! Paket ini tidak bisa dihapus karena masih memiliki riwayat data pesanan pelanggan.');
+            if ($request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Gagal menghapus! Paket masih digunakan.'], 422);
+            }
+            return back()->with(['error_delete' => 'Gagal menghapus!']);
         }
     }
 }

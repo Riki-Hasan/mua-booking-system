@@ -15,10 +15,12 @@ class ScheduleReminder extends Mailable
 
         public $booking;
         public $waUrl;
+        public $admin;
 
-        public function __construct($booking)
+        public function __construct($booking, $admin)
         {
             $this->booking = $booking;
+            $this->admin = $admin;
             
             // Logic Template WhatsApp
             $waNum = preg_replace('/^0/', '62', $booking->whatsapp_number);

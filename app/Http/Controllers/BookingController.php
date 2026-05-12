@@ -72,8 +72,11 @@ class BookingController extends Controller
 
         $source = $this->getSourceData($request->category_id);
         $persons = (int)$request->person_count;
+        
+        // DEKLARASI START TIME
+        $startTime = $request->start_time;
 
-        // 1. LOGIKA HARGA (Sesuai Rule Mas Riki)
+        // 1. LOGIKA HARGA 
         $calculatedPrice = $source->base_price;
         if ($source->is_bundling) {
             // Promo 1 orang diubah jadi 2 orang -> Harga x 2
@@ -85,12 +88,12 @@ class BookingController extends Controller
             $calculatedPrice = $source->base_price * $persons;
         }
 
-        // 2. LOGIKA DURASI (Sesuai Rule Mas Riki)
+        // 2. LOGIKA DURASI 
         // Jika 2 orang (baik promo maupun biasa), durasi dikali 1.5
         $multiplier = ($persons >= 2) ? 1.5 : 1.0;
         $actualDuration = (int)($source->duration_minutes * $multiplier);
 
-        $endTime = Carbon::parse($request->start_time)
+        $endTime = Carbon::parse($startTime)
                     ->addMinutes($actualDuration)
                     ->format('H:i');
 
@@ -99,6 +102,19 @@ class BookingController extends Controller
         $bulanAngka = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
         $dateStep1 = str_replace($bulanIndo, $bulanAngka, $request->booking_date);
         $dbDate = Carbon::createFromFormat('d-m-Y', $dateStep1)->format('Y-m-d');
+
+
+        // CEK BENTROK SEBELUM SIMPAN
+        $isClash = Booking::where('booking_date', $dbDate)
+            ->whereIn('status', ['confirmed', 'paid_dp', 'paid_full', 'pending', 'success'])
+            ->where(function($q) use ($startTime, $endTime) {
+                $q->where('start_time', '<', $endTime)
+                ->where('end_time', '>', $startTime);
+            })->exists();
+
+        if ($isClash) {
+            return back()->withInput()->withErrors(['error' => 'Maaf, jam tersebut baru saja dipesan orang lain. Silakan pilih jam atau tanggal lain!']);
+        }
 
         // 4. ONGKIR (Tetap berbayar, transport gratis dihapus)
         $additionalPrice = 0;
@@ -118,7 +134,7 @@ class BookingController extends Controller
             'address' => $request->address,
             'location_id' => $locationId,
             'booking_date' => $dbDate,
-            'start_time' => $request->start_time,
+            'start_time' => $startTime, // Menggunakan variabel yang sudah dibuat
             'end_time' => $endTime,
             'person_count' => $persons,
             'total_amount' => $totalAmount,
@@ -160,15 +176,23 @@ class BookingController extends Controller
             if (isset($availability[$day]) && $availability[$day]['status'] === 'holiday') continue;
 
             if (!isset($availability[$day])) {
-                $availability[$day] = ['status' => 'partial', 'details' => []];
+                $availability[$day] = ['status' => 'partial', 'details' => [], 'total_minutes' => 0];
             }
             
+            // Hitung durasi pesanan
+            $start = Carbon::parse($b->start_time);
+            $end = Carbon::parse($b->end_time);
+            $duration = $start->diffInMinutes($end);
+
             $availability[$day]['details'][] = [
-                'start' => Carbon::parse($b->start_time)->format('H:i'),
-                'end' => Carbon::parse($b->end_time)->format('H:i')
+                'start' => $start->format('H:i'),
+                'end' => $end->format('H:i')
             ];
             
-            if (count($availability[$day]['details']) >= 3) {
+            $availability[$day]['total_minutes'] += $duration;
+            
+            // REVISI: Hanya "Full" (Merah) jika total jadwal mencapai 24 jam (1440 menit)
+            if ($availability[$day]['total_minutes'] >= 1440) {
                 $availability[$day]['status'] = 'full';
             }
         }

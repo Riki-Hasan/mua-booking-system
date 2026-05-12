@@ -20,20 +20,20 @@ class DashboardController extends Controller
         // 1. Total Pesanan (Hanya yang sudah bayar valid)
         $totalOrders = Booking::whereIn('status', ['paid_dp', 'paid_full', 'confirmed'])->count();
 
-        // 2. REVISI: Lunas vs DP (Format: Lunas / DP)
+        // 2. Lunas vs DP
         $lunasCount = Booking::whereIn('status', ['paid_full', 'confirmed'])->count();
         $dpCount = Booking::where('status', 'paid_dp')->count();
 
-        // 3. REVISI: Jadwal Bulan Ini
+        // 3. Jadwal Bulan Ini
         $scheduleMonthCount = Booking::whereMonth('booking_date', $now->month)
                                     ->whereYear('booking_date', $now->year)
                                     ->whereIn('status', ['paid_dp', 'paid_full', 'confirmed'])
                                     ->count();
 
-        // 4. Total Pendapatan Real (Uang yang sudah benar-benar masuk)
-        $revenueFull = Booking::whereIn('status', ['paid_full', 'confirmed'])->sum('total_amount');
-        $revenueDP = Booking::where('status', 'paid_dp')->sum('dp_amount');
-        $totalRevenue = $revenueFull + $revenueDP;
+        // 4. REVISI: Total Pendapatan (Menghitung Harga Full Paket)
+        // Kita langsung jumlahkan 'total_amount' untuk semua status yang valid
+        $totalRevenue = Booking::whereIn('status', ['paid_dp', 'paid_full', 'confirmed'])
+                                ->sum('total_amount');
 
         return view('dashboard', compact(
             'totalOrders', 
@@ -71,25 +71,5 @@ class DashboardController extends Controller
     }
 
 
-    // test reminder
-    public function testReminder()
-    {
-        $admin = auth()->user();
-        $targetDate = Carbon::today()->addDays($admin->reminder_days)->toDateString();
-
-        // Masukkan status yang sah di sistem kamu
-        $bookings = \App\Models\Booking::where('booking_date', $targetDate)
-                        ->whereIn('status', ['success', 'paid_dp', 'confirmed', 'paid_full'])
-                        ->get();
-
-        if ($bookings->isEmpty()) {
-            return back()->with('error_delete', 'Tidak ada jadwal untuk H-' . $admin->reminder_days . ' (Tgl: ' . Carbon::parse($targetDate)->format('d/m/Y') . ')');
-        }
-
-        foreach ($bookings as $booking) {
-            \Illuminate\Support\Facades\Mail::to($admin->email)->send(new \App\Mail\ScheduleReminder($booking));
-        }
-
-        return back()->with('success_edit', 'Email pengingat berhasil dikirim ke ' . $admin->email);
-    }
+    
 }
