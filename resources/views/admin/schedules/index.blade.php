@@ -92,27 +92,27 @@
                         </div>
                         
                         <div class="div7 pt-2">
-                            <div class="bg-slate-950 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                            <div class="bg-slate-50 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden border border-slate-300">
                                 <div class="absolute top-0 right-0 w-32 h-32 bg-pink-600/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                                 <div class="summary-parent">
                                     <div class="s-div1 border-b border-white/5 pb-4 mb-2"><span class="text-[10px] font-black text-pink-500 italic uppercase">Ringkasan Biaya</span></div>
                                     
                                     <div class="s-div2 flex flex-col gap-2 text-[10px] font-bold text-gray-500 uppercase">
-                                        <p>Subtotal</p>
-                                        <p>Jumlah Orang</p>
-                                        <p class="text-white font-black mt-2">Ongkir</p>
-                                        <p class="text-white font-black mt-2">Total</p>
+                                        <p class="text-black font-black">Subtotal</p>
+                                        <p class="text-black font-black">Jumlah Orang</p>
+                                        <p class="text-black font-black mt-2">Ongkir</p>
+                                        <p class="text-black font-black mt-2">Total</p>
                                     </div>
                                     
-                                    <div class="s-div3 flex flex-col gap-2 text-[10px] font-black text-right text-white">
+                                    <div class="s-div3 flex flex-col gap-2 text-[10px] font-black text-right text-black">
                                         <p id="display_subtotal">Rp0</p>
                                         <p id="display_multiplier" class="text-pink-500">X1</p>
                                         <p id="display_ongkir" class="text-pink-500 mt-2">Rp0</p>
                                         <p class="text-xl text-pink-500 italic mt-1.5">Rp<span id="display_total">0</span></p>
                                     </div>
                                     
-                                    <div class="s-div4 pt-6"><label class="block mb-2 font-black text-[9px] uppercase text-gray-500">Metode</label>
-                                        <select name="payment_method" id="payMethod" onchange="togglePaymentInput()" class="p-3 bg-white/5 border-white/10 text-white text-xs uppercase outline-none rounded-xl w-full">
+                                    <div class="s-div4 pt-6"><label class="block mb-2 font-black text-[9px] uppercase text-black">Metode</label>
+                                        <select name="payment_method" id="payMethod" onchange="togglePaymentInput()" class="p-3 bg-white/5 border-white/10 text-black text-xs uppercase outline-none rounded-xl w-full">
                                             <option value="cash" class="bg-slate-900">Tunai (Cash)</option>
                                             <option value="qris" class="bg-slate-900">QRIS / Transfer</option>
                                         </select>
@@ -396,7 +396,7 @@
         function togglePaymentInput() {
             const method = document.getElementById('payMethod').value, area = document.getElementById('payment_input_area');
             if (method === 'cash') { 
-                area.innerHTML = `<label class="block text-[9px] font-black text-gray-500 uppercase mb-2 ml-1 tracking-widest">Nominal Tunai</label>
+                area.innerHTML = `<label class="block text-[9px] font-black text-black uppercase mb-2 ml-1 tracking-widest">Nominal Tunai</label>
                                   <input type="number" name="dp_amount" id="dpInput" placeholder="0" class="w-full bg-white/5 border-white/10 rounded-xl p-3 text-sm text-white outline-none">`; 
             } else { 
                 area.innerHTML = `<label class="block text-[9px] font-black text-gray-500 uppercase mb-2 ml-1 tracking-widest">Bayar</label>

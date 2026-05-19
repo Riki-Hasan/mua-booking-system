@@ -91,15 +91,15 @@
                 </div>
 
                 <div class="pt-2">
-                    <div class="bg-slate-950 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                    <div class="bg-slate-50 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden border border-slate-300">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-pink-600/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                         <div class="summary-parent relative z-[10]">
                             <div class="s-div1 border-b border-white/5 pb-4 mb-2"><span class="text-[10px] font-black text-pink-500 italic uppercase">Ringkasan Biaya</span></div>
-                            <div class="s-div2 flex flex-col gap-2 text-[10px] font-bold text-gray-500 uppercase"><p>Harga Paket</p><p>Jumlah Orang</p><p>Ongkir Lokasi</p><p class="text-white font-black mt-2">Total Estimasi</p></div>
-                            <div class="s-div3 flex flex-col gap-2 text-[10px] font-black text-right text-white"><p id="display_subtotal">Rp{{ number_format($category->base_price, 0, ',', '.') }}</p><p id="display_multiplier" class="text-pink-500 italic">X1</p><p id="display_extra" class="text-pink-500">Rp0</p><p class="text-2xl text-pink-500 italic mt-1.5 font-black">Rp<span id="display_total">0</span></p></div>
+                            <div class="s-div2 flex flex-col gap-2 text-[10px] font-bold text-black uppercase"><p>Harga Paket</p><p>Jumlah Orang</p><p>Ongkir Lokasi</p><p class= text-black font-black mt-2">Total Estimasi</p></div>
+                            <div class="s-div3 flex flex-col gap-2 text-[10px] font-black text-right text-black"><p id="display_subtotal">Rp{{ number_format($category->base_price, 0, ',', '.') }}</p><p id="display_multiplier" class="text-pink-500 italic">X1</p><p id="display_extra" class="text-pink-500">Rp0</p><p class="text-2xl text-pink-500 italic mt-1.5 font-black">Rp<span id="display_total">0</span></p></div>
                             
                             <div class="s-div4 pt-6 mt-4 border-t border-white/5">
-                                <label class="block mb-3 font-black text-[9px] uppercase text-gray-500 tracking-widest">Bocoran Pembayaran</label>
+                                <label class="block mb-3 font-black text-[9px] uppercase text-black tracking-widest">Bocoran Pembayaran</label>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div class="bg-pink-500/10 p-3 rounded-2xl border border-pink-500/20">
                                         <p class="text-[7px] text-pink-400 uppercase font-black">Bayar Lunas</p>
@@ -111,7 +111,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="s-div5 pt-4 text-[8px] text-gray-500 italic text-center leading-relaxed">Rincian asli akan muncul pada halaman pembayaran berikutnya.</div>
+                            <div class="s-div5 pt-4 text-[8px] text-black italic text-center leading-relaxed">Rincian asli akan muncul pada halaman pembayaran berikutnya.</div>
                         </div>
                     </div>
                 </div>
