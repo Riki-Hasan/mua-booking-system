@@ -172,6 +172,56 @@
         }
     }
 
+    // --- AJAX: EDIT PORTFOLIO ---
+    function openEditPortfolioModal(item) {
+        document.getElementById('edit_portfolio_category_id').value = item.category_id;
+        document.getElementById('editPortfolioForm').action = `/admin/portfolios/${item.id}`;
+        document.getElementById('modalEditPortfolio').classList.replace('hidden', 'flex');
+    }
+
+    async function submitEditPortfolioAjax() {
+        const form = document.getElementById('editPortfolioForm');
+        const formData = new FormData(form);
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok) {
+                closeModal('modalEditPortfolio');
+                showStatusModal('success', 'Tersimpan!', result.message);
+                setTimeout(() => window.location.reload(), 1200);
+            }
+        } catch (error) { showStatusModal('error', 'Error!', 'Gagal mengubah kategori portfolio.'); }
+    }
+
+    // --- AJAX: EDIT KEBAYA ---
+    function openEditKebayaModal(item) {
+        document.getElementById('edit_kebaya_name').value = item.name;
+        document.getElementById('editKebayaForm').action = `/admin/kebayas/${item.id}`;
+        document.getElementById('modalEditKebaya').classList.replace('hidden', 'flex');
+    }
+
+    async function submitEditKebayaAjax() {
+        const form = document.getElementById('editKebayaForm');
+        const formData = new FormData(form);
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok) {
+                closeModal('modalEditKebaya');
+                showStatusModal('success', 'Tersimpan!', result.message);
+                setTimeout(() => window.location.reload(), 1200);
+            }
+        } catch (error) { showStatusModal('error', 'Error!', 'Gagal mengubah data kebaya.'); }
+    }
+
     // --- INITIALIZATION ---
     document.addEventListener('DOMContentLoaded', function() {
         const el = document.getElementById('sortable-table');

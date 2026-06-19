@@ -111,3 +111,51 @@
         <button onclick="closeModal('modalLimit')" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl uppercase text-[10px]">Siap, Saya Ganti</button>
     </div>
 </div>
+
+{{-- MODAL EDIT KONTEN PORTFOLIO --}}
+<div id="modalEditPortfolio" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border-4 border-blue-50 animate-pop">
+        <h3 class="text-2xl font-black text-gray-900 uppercase italic tracking-tighter mb-6 text-center">Edit Portfolio</h3>
+        <form id="editPortfolioForm" onsubmit="event.preventDefault(); submitEditPortfolioAjax();" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf @method('PUT')
+            <div>
+                <label class="text-[9px] font-black text-gray-400 uppercase mb-2 ml-1 block">Kategori Paket</label>
+                <select name="category_id" id="edit_portfolio_category_id" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-400">
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="text-[9px] font-black text-gray-400 uppercase mb-2 ml-1 block">Ganti Gambar Portfolio (Maks 2MB - Opsional)</label>
+                <input type="file" name="image" class="w-full text-[10px] font-bold text-gray-400 file:bg-blue-50 file:text-blue-600 file:border-0 file:rounded-xl file:px-4 file:py-2">
+            </div>
+            <div class="flex gap-3 mt-8">
+                <button type="button" onclick="closeModal('modalEditPortfolio')" class="flex-1 bg-gray-100 text-gray-400 font-black py-4 rounded-2xl uppercase text-[10px]">Batal</button>
+                <button type="submit" class="flex-1 bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-[10px]">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- MODAL EDIT KEBAYA --}}
+<div id="modalEditKebaya" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border-4 border-blue-50 animate-pop">
+        <h3 class="text-2xl font-black text-gray-900 uppercase italic tracking-tighter mb-6 text-center">Edit Kebaya</h3>
+        <form id="editKebayaForm" onsubmit="event.preventDefault(); submitEditKebayaAjax();" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf @method('PUT')
+            <div>
+                <label class="text-[9px] font-black text-gray-400 uppercase mb-2 ml-1 block">Nama Kebaya</label>
+                <input type="text" name="name" id="edit_kebaya_name" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-blue-400 outline-none" required>
+            </div>
+            <div>
+                <label class="text-[9px] font-black text-gray-400 uppercase mb-2 ml-1 block">Ganti Gambar Kebaya (Maks 2MB - Opsional)</label>
+                <input type="file" name="image" class="w-full text-[10px] font-bold text-gray-400 file:bg-blue-50 file:text-blue-600 file:border-0 file:rounded-xl file:px-4 file:py-2">
+            </div>
+            <div class="flex gap-3 mt-8">
+                <button type="button" onclick="closeModal('modalEditKebaya')" class="flex-1 bg-gray-100 text-gray-400 font-black py-4 rounded-2xl uppercase text-[10px]">Batal</button>
+                <button type="submit" class="flex-1 bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-[10px]">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>

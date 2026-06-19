@@ -25,6 +25,9 @@
         <div class="aspect-square overflow-hidden relative">
             <img src="{{ asset('storage/' . $item->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
             <div class="absolute top-2 right-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                <button type="button" onclick="openEditPortfolioModal({{ json_encode($item) }})" class="w-8 h-8 bg-white/90 rounded-full text-blue-500 shadow-lg flex items-center justify-center mb-1">
+                    <i class="fa-solid fa-pen text-[10px]"></i>
+                </button>
                 <button type="button" onclick="confirmDelete('{{ $item->id }}', 'Foto Galeri {{ $item->category->name }}', 'portfolio')" class="w-8 h-8 bg-white/90 rounded-full text-rose-500 shadow-lg flex items-center justify-center">
                     <i class="fa-solid fa-trash-can text-[10px]"></i>
                 </button>

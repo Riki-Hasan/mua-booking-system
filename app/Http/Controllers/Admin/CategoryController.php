@@ -170,4 +170,50 @@ class CategoryController extends Controller
             return back()->with(['error_delete' => 'Gagal menghapus!']);
         }
     }
+
+    public function updatePortfolio(Request $request, $id)
+    {
+        $portfolio = Portfolio::findOrFail($id);
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        $data = ['category_id' => $request->category_id];
+
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama agar storage tidak penuh
+            if ($portfolio->image_path) {
+                Storage::disk('public')->delete($portfolio->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('portfolio', 'public');
+        }
+
+        $portfolio->update($data);
+
+        return response()->json(['status' => 'success', 'message' => 'Portfolio berhasil diperbarui!']);
+    }
+
+    public function updateKebayaData(Request $request, $id)
+    {
+        $kebaya = Kebaya::findOrFail($id);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        $data = ['name' => $request->name];
+
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama
+            if ($kebaya->image_path) {
+                Storage::disk('public')->delete($kebaya->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('kebayas', 'public');
+        }
+
+        $kebaya->update($data);
+
+        return response()->json(['status' => 'success', 'message' => 'Data Kebaya berhasil diperbarui!']);
+    }
 }
