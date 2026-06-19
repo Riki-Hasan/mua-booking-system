@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
@@ -110,62 +111,58 @@
             </div>
         </section>
 
-        <section id="portfolio" class="max-w-6xl mx-auto py-12" x-data="{ activeTab: 'makeup' }">
-            {{-- Navigasi Tab --}}
-            <div class="flex justify-center gap-8 mb-12">
-                <button @click="activeTab = 'makeup'"
-                    :class="activeTab === 'makeup' ? 'text-rose-500 border-b-2 border-rose-500' : 'text-gray-400 hover:text-rose-300'"
-                    class="pb-2 text-[10px] font-black uppercase tracking-[0.3em] transition-all">
-                    Makeup Portfolio
-                </button>
-                <button @click="activeTab = 'kebaya'"
-                    :class="activeTab === 'kebaya' ? 'text-rose-500 border-b-2 border-rose-500' : 'text-gray-400 hover:text-rose-300'"
-                    class="pb-2 text-[10px] font-black uppercase tracking-[0.3em] transition-all">
-                    Koleksi Kebaya
-                </button>
-            </div>
+     <section id="portfolio" class="max-w-6xl mx-auto py-12" x-data="{ activeTab: 'makeup' }">
+    {{-- Navigasi Tab --}}
+    <div class="flex justify-center gap-8 mb-12">
+        {{-- Trik Utama: Setiap diklik, jalankan AOS.refresh() setelah jeda singkat --}}
+        <button @click="activeTab = 'makeup'; $nextTick(() => { AOS.refresh(); })"
+            :class="activeTab === 'makeup' ? 'text-rose-500 border-b-2 border-rose-500' : 'text-gray-400 hover:text-rose-300'"
+            class="pb-2 text-[10px] font-black uppercase tracking-[0.3em] transition-all">
+            Makeup Portfolio
+        </button>
+        <button @click="activeTab = 'kebaya'; $nextTick(() => { AOS.refresh(); })"
+            :class="activeTab === 'kebaya' ? 'text-rose-500 border-b-2 border-rose-500' : 'text-gray-400 hover:text-rose-300'"
+            class="pb-2 text-[10px] font-black uppercase tracking-[0.3em] transition-all">
+            Koleksi Kebaya
+        </button>
+    </div>
 
-            {{-- Isi Tab: Makeup --}}
-            <div x-show="activeTab === 'makeup'" 
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 transform scale-95"
-                 x-transition:enter-end="opacity-100 transform scale-100">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    @foreach($portfolios as $index => $portfolio)
-                    <div class="relative group aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden shadow-sm {{ $index % 2 != 0 ? 'md:mt-12' : '' }}">
-                        <img src="{{ asset('storage/' . $portfolio->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center p-6 text-center">
-                            <h4 class="text-white font-black italic text-lg leading-tight">{{ $portfolio->category->name }}</h4>
-                            <p class="text-rose-200 font-bold text-xs mb-4">Rp{{ number_format($portfolio->category->base_price, 0, ',', '.') }}</p>
-                            <a href="{{ route('booking.create', $portfolio->category_id) }}" class="bg-white text-slate-900 px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all">Book Now</a>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+    {{-- Isi Tab: Makeup --}}
+    {{-- Di sini kita matikan x-transition dari Alpine agar tidak tabrakan dengan AOS --}}
+    <div x-show="activeTab === 'makeup'" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @foreach($portfolios as $index => $portfolio)
+        <div class="relative group aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden shadow-sm {{ $index % 2 != 0 ? 'md:mt-12' : '' }}" 
+             data-aos="{{ $index % 2 == 0 ? 'fade-right' : 'fade-left' }}">
+            
+            <img src="{{ asset('storage/' . $portfolio->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+            <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center p-6 text-center">
+                <h4 class="text-white font-black italic text-lg leading-tight">{{ $portfolio->category->name }}</h4>
+                <p class="text-rose-200 font-bold text-xs mb-4">Rp{{ number_format($portfolio->category->base_price, 0, ',', '.') }}</p>
+                <a href="{{ route('booking.create', $portfolio->category_id) }}" class="bg-white text-slate-900 px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all">Book Now</a>
             </div>
+        </div>
+        @endforeach
+    </div>
 
-            {{-- Isi Tab: Kebaya --}}
-            <div x-show="activeTab === 'kebaya'" 
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 transform scale-95"
-                 x-transition:enter-end="opacity-100 transform scale-100"
-                 x-cloak>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    @forelse($kebayas as $index => $kebaya)
-                    <div class="relative group aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden shadow-sm {{ $index % 2 != 0 ? 'md:mt-12' : '' }}">
-                        <img src="{{ asset('storage/' . $kebaya->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-slate-900/90 to-transparent flex flex-col items-center justify-end h-1/2">
-                            <h4 class="text-white font-black italic text-sm uppercase tracking-tighter">{{ $kebaya->name }}</h4>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="col-span-full py-20 text-center text-gray-300 font-black uppercase italic text-xs tracking-[0.3em]">
-                        Belum ada koleksi kebaya yang tersedia
-                    </div>
-                    @endforelse
-                </div>
+    {{-- Isi Tab: Kebaya --}}
+    <div x-show="activeTab === 'kebaya'" class="grid grid-cols-2 md:grid-cols-4 gap-4" x-cloak>
+        @forelse($kebayas as $index => $kebaya)
+        <div class="relative group aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden shadow-sm {{ $index % 2 != 0 ? 'md:mt-12' : '' }}"
+             data-aos="{{ $index % 2 == 0 ? 'fade-right' : 'fade-left' }}">
+            
+            <img src="{{ asset('storage/' . $kebaya->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+            <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-slate-900/90 to-transparent flex flex-col items-center justify-end h-1/2">
+                <h4 class="text-white font-black italic text-sm uppercase tracking-tighter">{{ $kebaya->name }}</h4>
             </div>
-        </section>
+        </div>
+        @empty
+        <div class="col-span-full py-20 text-center text-gray-300 font-black uppercase italic text-xs tracking-[0.3em]">
+            Belum ada koleksi kebaya yang tersedia
+        </div>
+        @endforelse
+    </div>
+</section>
+
 
         <section id="pricelist" class="py-24">
             <div class="bg-white rounded-[3rem] p-8 md:p-16 border border-rose-50 shadow-sm">
@@ -245,6 +242,14 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
+    </script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800, // Kecepatan animasi (800ms = 0.8 detik)
+            once: false,   // Setel 'false' agar animasi muncul lagi setiap di-scroll naik-turun
+            mirror: true   // Animasi akan konsisten saat scroll ke atas maupun ke bawah
+        });
     </script>
 </body>
 </html>
