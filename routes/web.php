@@ -91,8 +91,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::post('/kebayas', [CategoryController::class, 'storeKebaya'])->name('kebayas.store');
     Route::delete('/kebayas/{id}', [CategoryController::class, 'destroyKebaya'])->name('kebayas.destroy');
     Route::patch('/profile/full-update', [ScheduleController::class, 'updateAllSettings'])->name('profile.full_update');
-    Route::put('/portfolios/{id}', [App\Http\Controllers\Admin\CategoryControllergit::class, 'updatePortfolio'])->name('admin.portfolios.update');
-    Route::put('/kebayas/{id}', [App\Http\Controllers\Admin\CategoryControllergit::class, 'updateKebayaData'])->name('admin.kebayas.update');
+    Route::put('/portfolios/{id}', [\App\Http\Controllers\Admin\CategoryController::class, 'updatePortfolio'])->name('admin.portfolios.update');
+    Route::put('/kebayas/{id}', [\App\Http\Controllers\Admin\CategoryController::class, 'updateKebayaData'])->name('admin.kebayas.update');
 });
 
 // Redirect Breeze Default Dashboard ke Admin Dashboard

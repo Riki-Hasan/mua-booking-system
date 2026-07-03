@@ -59,7 +59,6 @@
             if (response.ok) {
                 closeModal('modalDelete');
                 showStatusModal('success', 'Terhapus!', result.message);
-                // Refresh otomatis setelah 1.2 detik agar data hilang dari list
                 setTimeout(() => window.location.reload(), 1200);
             }
         } catch (error) {
@@ -121,7 +120,7 @@
 
         try {
             const response = await fetch(form.action, {
-                method: 'POST', // Menggunakan POST dengan _method PUT di dalam FormData
+                method: 'POST',
                 headers: { 
                     'X-CSRF-TOKEN': '{{ csrf_token() }}', 
                     'Accept': 'application/json',
@@ -163,8 +162,6 @@
             const result = await response.json();
             if (response.ok) {
                 showStatusModal('success', 'Berhasil!', 'Urutan paket rias telah diperbarui.');
-                // Tidak perlu reload jika ingin benar-benar tanpa refresh, 
-                // tapi reload disarankan agar urutan ID di sistem konsisten.
                 setTimeout(() => window.location.reload(), 1200);
             }
         } catch (error) {
@@ -173,15 +170,21 @@
     }
 
     // --- AJAX: EDIT PORTFOLIO ---
-    function openEditPortfolioModal(item) {
-        document.getElementById('edit_portfolio_category_id').value = item.category_id;
-        document.getElementById('editPortfolioForm').action = `/admin/portfolios/${item.id}`;
+    function openEditPortfolioModal(id, categoryId) {
+        document.getElementById('edit_portfolio_category_id').value = categoryId;
+        document.getElementById('editPortfolioForm').action = `/admin/portfolios/${id}`;
+        
+        const fileInput = document.querySelector('#editPortfolioForm input[type="file"]');
+        if (fileInput) fileInput.value = '';
+
         document.getElementById('modalEditPortfolio').classList.replace('hidden', 'flex');
     }
 
     async function submitEditPortfolioAjax() {
         const form = document.getElementById('editPortfolioForm');
         const formData = new FormData(form);
+        formData.append('_method', 'PUT');
+
         try {
             const response = await fetch(form.action, {
                 method: 'POST',
@@ -193,20 +196,30 @@
                 closeModal('modalEditPortfolio');
                 showStatusModal('success', 'Tersimpan!', result.message);
                 setTimeout(() => window.location.reload(), 1200);
+            } else {
+                showStatusModal('error', 'Gagal!', result.message || 'Gagal merubah data.');
             }
-        } catch (error) { showStatusModal('error', 'Error!', 'Gagal mengubah kategori portfolio.'); }
+        } catch (error) { 
+            showStatusModal('error', 'Error!', 'Gagal mengubah kategori portfolio.'); 
+        }
     }
 
     // --- AJAX: EDIT KEBAYA ---
-    function openEditKebayaModal(item) {
-        document.getElementById('edit_kebaya_name').value = item.name;
-        document.getElementById('editKebayaForm').action = `/admin/kebayas/${item.id}`;
+    function openEditKebayaModal(id, name) {
+        document.getElementById('edit_kebaya_name').value = name;
+        document.getElementById('editKebayaForm').action = `/admin/kebayas/${id}`;
+        
+        const fileInput = document.querySelector('#editKebayaForm input[type="file"]');
+        if (fileInput) fileInput.value = '';
+
         document.getElementById('modalEditKebaya').classList.replace('hidden', 'flex');
     }
 
     async function submitEditKebayaAjax() {
         const form = document.getElementById('editKebayaForm');
         const formData = new FormData(form);
+        formData.append('_method', 'PUT');
+
         try {
             const response = await fetch(form.action, {
                 method: 'POST',
@@ -218,8 +231,12 @@
                 closeModal('modalEditKebaya');
                 showStatusModal('success', 'Tersimpan!', result.message);
                 setTimeout(() => window.location.reload(), 1200);
+            } else {
+                showStatusModal('error', 'Gagal!', result.message || 'Gagal merubah data.');
             }
-        } catch (error) { showStatusModal('error', 'Error!', 'Gagal mengubah data kebaya.'); }
+        } catch (error) { 
+            showStatusModal('error', 'Error!', 'Gagal mengubah data kebaya.'); 
+        }
     }
 
     // --- INITIALIZATION ---

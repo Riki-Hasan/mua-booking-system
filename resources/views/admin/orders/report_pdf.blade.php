@@ -33,7 +33,16 @@
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ \Carbon\Carbon::parse($order->booking_date)->format('d/m/Y') }}</td>
-                <td>{{ $order->customer_name }}</td> <td>{{ $order->category->name }}</td> 
+                <td>{{ $order->customer_name }}</td> 
+                <td>
+                    @if($order->category)
+                        {{ $order->category->name }}
+                    @elseif(isset($order->bundling) && $order->bundling)
+                        {{ $order->bundling->subject }} <small style="color: #666;">(Bundling)</small>
+                    @else
+                        {{ $order->bundling_id ? 'Paket Bundling' : 'Layanan Tidak Tersedia' }}
+                    @endif
+                </td>
                 <td>
                     @if($order->dp_amount >= $order->total_amount)
                         <span class="status-full">[LUNAS]</span>
