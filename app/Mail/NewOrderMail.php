@@ -36,7 +36,7 @@ class NewOrderMail extends Mailable
                                     </tr>
                                     <tr>
                                         <td style='padding: 8px 0; color: #9d174d; font-weight: bold;'>Layanan</td>
-                                        <td style='padding: 8px 0; font-weight: 900;'>: {$this->booking->category->name}</td>
+                                        <td style='padding: 8px 0; font-weight: 900;'>: " . ($this->booking->category->name ?? 'Layanan/Promo Tidak Tersedia') . "</td>
                                     </tr>
                                     <tr>
                                         <td style='padding: 8px 0; color: #9d174d; font-weight: bold;'>Total Bayar</td>
