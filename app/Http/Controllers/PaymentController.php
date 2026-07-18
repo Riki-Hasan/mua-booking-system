@@ -111,40 +111,58 @@ class PaymentController extends Controller
 
     public function callback(Request $request)
     {
-        Log::info("Callback Midtrans Masuk!", $request->all());
+        // Log 1: Memastikan apakah server Midtrans benar-benar berhasil mengetuk pintu Ngrok kamu
+        Log::info("=== WEBHOOK MIDTRANS KETUK PINTU ===");
+        Log::info("Data Payload Masuk:", $request->all());
 
         $serverKey = env('MIDTRANS_SERVER_KEY');
         $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
 
-        // 1. Validasi Signature (Keamanan)
+        // Log 2: Memeriksa apakah Signature Key valid atau tidak
+        Log::info("Hashed lokal: " . $hashed);
+        Log::info("Signature dari Midtrans: " . $request->signature_key);
+
         if ($hashed !== $request->signature_key) {
-            Log::warning("Signature Key Tidak Cocok! Percobaan manipulasi data.");
+            Log::warning("⚠️ CRITICAL: Signature Key TIDAK COCOK!");
             return response()->json(['message' => 'Invalid Signature'], 403);
         }
 
         $transactionStatus = $request->transaction_status;
+        Log::info("Status Transaksi Midtrans: " . $transactionStatus);
+
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             
             $orderData = explode('-', $request->order_id);
-            // Format Order ID: MUA-{type}-{bookingId}-{timestamp}
+            Log::info("Hasil Pecahan Order ID:", $orderData);
+
+            if (count($orderData) < 3) {
+                Log::error("❌ Format Order ID tidak sesuai standard MUA-type-id-timestamp");
+                return response()->json(['message' => 'Invalid Order ID Format'], 400);
+            }
+
             $type = $orderData[1]; 
             $bookingId = $orderData[2];
+
+            Log::info("Mencoba mencari Booking dengan ID: " . $bookingId . " | Tipe: " . $type);
 
             $booking = Booking::find($bookingId);
             
             if ($booking) {
-                // 2. Cegah Downgrade Status: 
-                // Jika sudah Lunas (paid_full) atau Dikonfirmasi (confirmed), jangan ubah lagi.
+                Log::info("Status Awal Booking di DB: " . $booking->status);
+
                 if (in_array($booking->status, ['paid_full', 'confirmed'])) {
-                    Log::info("Booking #$bookingId sudah berstatus " . $booking->status . ". Update dilewati.");
+                    Log::info("♻️ Booking #$bookingId sudah Lunas/Confirmed. Update dilewati.");
                 } else {
+                    $oldStatus = $booking->status;
                     $booking->status = ($type == 'dp') ? 'paid_dp' : 'paid_full';
                     $booking->save();
-                    Log::info("Booking #$bookingId berhasil diupdate ke: " . $booking->status);
+                    Log::info("✅ SUKSES BERHASIL UPDATE! Booking #$bookingId dari [$oldStatus] berganti ke: " . $booking->status);
                 }
             } else {
-                Log::error("Booking #$bookingId tidak ditemukan di database saat callback.");
+                Log::error("❌ ERROR CRITICAL: Booking ID #$bookingId TIDAK DITEMUKAN di database saat callback!");
             }
+        } else {
+            Log::info("ℹ️ Status transaksi bukan capture/settlement (Status: $transactionStatus). Mengabaikan update.");
         }
 
         return response()->json(['status' => 'success']);

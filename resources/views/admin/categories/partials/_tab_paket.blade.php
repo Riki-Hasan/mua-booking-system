@@ -15,7 +15,7 @@
             <label class="block text-[9px] font-black text-gray-400 uppercase mb-2 ml-1">Durasi (Menit)</label>
             <input type="number" name="duration_minutes" placeholder="90" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 text-sm font-bold outline-none" required>
         </div>
-        <button type="submit" class="bg-gray-900 text-white font-black py-4 rounded-2xl hover:bg-pink-600 transition-all shadow-lg text-[10px] uppercase tracking-widest">
+        <button type="submit" class="bg-pink-600 text-white font-black py-4 rounded-2xl hover:bg-pink-600 transition-all shadow-lg  uppercase active:scale-95  text-xs  tracking-wider shadow-lg shadow-pink-100">
             Simpan Paket
         </button>
     </form>

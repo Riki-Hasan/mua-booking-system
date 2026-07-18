@@ -10,50 +10,55 @@
     <div class="py-6 md:py-12 bg-slate-100 min-h-screen"> 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> 
             
-            {{-- WELCOME BANNER WITH HIGH CONTRAST BORDER --}}
-            <div class="bg-white overflow-hidden shadow-md rounded-[2rem] md:rounded-[2.5rem] mb-6 md:mb-8 border-4 border-pink-500 relative overflow-hidden">
+            {{-- Perbaikan 2: Mengurangi ketebalan border dari border-4 ke border-2 pada mobile/tab, serta memangkas padding agar tidak gemuk --}}
+            <div class="bg-white overflow-hidden shadow-md rounded-[2rem] md:rounded-[2.5rem] mb-6 md:mb-8 border-2 md:border-4 border-pink-500 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-40 h-40 bg-pink-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                <div class="p-6 md:p-10 text-gray-900 relative z-10"> 
-                    <h1 class="text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-slate-900">Halo, {{ explode(' ', Auth::user()->name)[0] }}! ✨</h1>
-                    <p class="text-slate-600 text-xs md:text-sm font-extrabold uppercase tracking-widest mt-2 bg-pink-50 inline-block px-3 py-1 rounded-lg">Kelola bisnismu dengan satu genggaman modern.</p>
+                <div class="p-4 tab:p-5 md:p-10 text-gray-900 relative z-10"> 
+                    <h1 class="text-2xl tab:text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-slate-900">Halo, {{ explode(' ', Auth::user()->name)[0] }}! ✨</h1>
+                    <p class="text-slate-600 text-[10px] md:text-sm font-extrabold uppercase tracking-widest mt-1.5 bg-pink-50 inline-block px-2.5 py-0.5 md:px-3 md:py-1 rounded-lg">Kelola bisnismu dengan satu genggaman modern.</p>
                 </div>
             </div>
 
-            {{-- METRICS CARDS SECTION (MORE TEXT CONTRAST & ACCENT BORDERS) --}}
+            {{-- Perbaikan 3: Urutan METRICS CARDS disusun ulang (2 Atas: Pesanan & Pendapatan | 2 Bawah: Agenda & Status Bayar) --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-10">
                 
-                {{-- CARD 1: TOTAL PESANAN --}}
-                <div class="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-md border-2 border-slate-200 border-l-[6px] border-l-slate-800">
-                    <p class="text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Total Pesanan</p>
-                    <p class="text-3xl md:text-4xl font-black text-slate-900 italic mt-1">{{ $totalOrders }}</p>
+                {{-- BARIS ATAS - CARD 1: TOTAL PESANAN --}}
+                <div class="bg-white p-4 tab:p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-md border-2 border-slate-200 border-l-[6px] border-l-slate-800 flex flex-col justify-center">
+                    <p class="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Total Pesanan</p>
+                    <p class="text-2xl tab:text-3xl md:text-4xl font-black text-slate-900 italic mt-1">{{ $totalOrders }}</p>
                 </div>
 
-                {{-- CARD 2: STATUS BAYAR --}}
-                <div class="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-md border-2 border-slate-200 border-l-[6px] border-l-pink-600">
-                    <p class="text-xs font-black uppercase text-pink-600 tracking-wider mb-1">Status Bayar (Lunas/DP)</p>
-                    <h3 class="text-3xl md:text-4xl font-black text-slate-900 italic mt-1">
-                        {{ $lunasCount }}<span class="text-slate-400 text-2xl mx-1">/</span><span class="text-pink-600">{{ $dpCount }}</span>
-                    </h3>
-                    <p class="text-[10px] text-slate-500 font-extrabold mt-1 uppercase italic bg-pink-50 inline-block px-2 py-0.5 rounded">Sistem Pembayaran</p>
+                {{-- BARIS ATAS - CARD 2: TOTAL PENDAPATAN (Sekarang disandingkan ke baris atas berdampingan dengan Total Pesanan) --}}
+                <div class="bg-white p-4 tab:p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-md border-2 border-slate-200 border-l-[6px] border-l-blue-600 flex flex-col justify-center">
+                    <p class="text-[10px] md:text-xs font-black text-slate-500 tracking-wider uppercase mb-1">Total Pendapatan</p>
+                    <div class="mt-1">
+                        <p class="text-sm tab:text-base md:text-2xl font-black text-blue-700 italic bg-blue-50/50 p-1.5 tab:p-2 rounded-xl border border-blue-100 inline-block whitespace-nowrap">Rp{{ number_format($totalRevenue, 0, ',', '.') }}</p>
+                    </div>
                 </div>
 
-                {{-- CARD 3: AGENDA KERJA --}}
-                <a href="{{ route('admin.schedules.monthly') }}" class="col-span-2 md:col-span-1 bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-md border-2 border-slate-200 border-l-[6px] border-l-emerald-500 hover:border-emerald-500 transition-all group shadow-sm hover:shadow-lg">
-                    <p class="text-xs font-black uppercase text-emerald-600 tracking-wider mb-1">Agenda Kerja</p>
-                    <h3 class="text-3xl md:text-4xl font-black text-slate-900 italic mt-1 group-hover:text-emerald-600 transition-colors">
+                {{-- BARIS BAWAH - CARD 3: AGENDA KERJA (Dipindahkan ke baris bawah) --}}
+                <a href="{{ route('admin.schedules.monthly') }}" class="bg-white p-4 tab:p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-md border-2 border-slate-200 border-l-[6px] border-l-emerald-500 hover:border-emerald-500 transition-all group shadow-sm hover:shadow-lg flex flex-col justify-center">
+                    <p class="text-[10px] md:text-xs font-black uppercase text-emerald-600 tracking-wider mb-1">Agenda Kerja</p>
+                    <h3 class="text-2xl tab:text-3xl md:text-4xl font-black text-slate-900 italic mt-1 group-hover:text-emerald-600 transition-colors leading-none">
                         {{ $scheduleMonthCount }}
                     </h3>
-                    <p class="text-[10px] text-emerald-600 font-black mt-1 uppercase italic group-hover:underline">Jadwal Bulan Ini &rarr;</p>
+                    <p class="text-[9px] text-emerald-600 font-black mt-1 uppercase italic group-hover:underline">Jadwal Bulan Ini &rarr;</p>
                 </a>
 
-                {{-- CARD 4: TOTAL PENDAPATAN --}}
-                <div class="col-span-2 md:col-span-1 bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-md border-2 border-slate-200 border-l-[6px] border-l-blue-600">
-                    <p class="text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Total Pendapatan</p>
-                    <p class="text-2xl md:text-3xl font-black text-blue-700 italic mt-1 bg-blue-50/50 p-2 rounded-xl border border-blue-100 inline-block">Rp{{ number_format($totalRevenue, 0, ',', '.') }}</p>
+                {{-- BARIS BAWAH - CARD 4: STATUS BAYAR (Dipindahkan ke baris bawah berdampingan dengan Agenda Kerja) --}}
+                <div class="bg-white p-4 tab:p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-md border-2 border-slate-200 border-l-[6px] border-l-pink-600 flex flex-col justify-center">
+                    <p class="text-[10px] md:text-xs font-black uppercase text-pink-600 tracking-wider mb-1">Status Bayar (Lunas/DP)</p>
+                    <h3 class="text-2xl tab:text-3xl md:text-4xl font-black text-slate-900 italic mt-1 leading-none">
+                        {{ $lunasCount }}<span class="text-slate-400 text-lg md:text-2xl mx-1">/</span><span class="text-pink-600">{{ $dpCount }}</span>
+                    </h3>
+                    <div class="mt-1">
+                        <p class="text-[8px] md:text-[10px] text-slate-500 font-extrabold uppercase italic bg-pink-50 inline-block px-1.5 py-0.5 rounded leading-none">Sistem Pembayaran</p>
+                    </div>
                 </div>
+
             </div>
 
-            {{-- NAVIGATION NAVIGATION MENUS (BOLD TITLES & HIGH CONTRAST) --}}
+            {{-- NAVIGATION MENUS (BOLD TITLES & HIGH CONTRAST) --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 
                 {{-- BUTTON 1 --}}

@@ -14,6 +14,9 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            screens: {
+                'tab': '450px', // Menambahkan breakpoint custom tab >= 450px
+            },
         },
     },
 

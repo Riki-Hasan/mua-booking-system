@@ -1,40 +1,55 @@
 <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 mb-8">
     <h3 class="text-lg font-black mb-6 text-gray-800 tracking-tighter uppercase italic">Upload Portfolio Makeup</h3>
-    <form action="{{ route('admin.categories.update_image') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+    <form action="{{ route('admin.categories.update_image') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
         @csrf
         <input type="hidden" name="current_tab" :value="tab">
+        
         <div>
-            <label class="block text-[9px] font-black text-gray-400 uppercase mb-2">Pilih Paket</label>
-            <select name="category_id" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-pink-500">
+            <label class="block text-xs font-black text-gray-700 uppercase mb-2 ml-1">Pilih Paket</label>
+            <select name="category_id" class="w-full border-gray-300 bg-white rounded-2xl p-4 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-pink-500">
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                 @endforeach
             </select>
         </div>
+
+        <!-- REVISI 1: Tombol Input File Dikembalikan Biasa/Standard Bawaan Sebelumnya -->
         <div>
-            <label class="block text-[9px] font-black text-gray-400 uppercase mb-2">File Gambar (Maks 2MB)</label>
-            <input type="file" name="image" class="w-full text-[10px] font-bold text-gray-400 file:bg-pink-50 file:text-pink-600 file:border-0 file:rounded-xl file:px-4 file:py-2" required>
+            <label class="block text-xs font-black text-gray-700 uppercase mb-2 ml-1">File Gambar (Maks 2MB)</label>
+            <input type="file" name="image" class="w-full text-xs font-bold text-gray-700 border border-gray-300 rounded-2xl p-3 bg-white file:bg-pink-50 file:text-pink-600 file:border-0 file:rounded-xl file:px-4 file:py-2 file:font-black file:uppercase file:text-[10px] file:mr-2 file:shadow-sm" required>
         </div>
-        <button type="submit" class="bg-gray-900 text-white font-black py-4 rounded-2xl hover:bg-emerald-500 transition-all text-[10px] uppercase">Upload Portfolio</button>
+
+        <button type="submit" class="bg-pink-600 text-white font-black py-4 rounded-2xl hover:bg-pink-700 active:scale-95 transition-all text-xs uppercase tracking-wider shadow-lg shadow-pink-100">
+            ✨ Upload Portfolio
+        </button>
     </form>
 </div>
 
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+<!-- GRID TETAP 2 GAMBAR SEBARIS -->
+<div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
     @foreach($portfolios as $item)
     <div class="bg-white rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100 group relative">
-        <div class="aspect-square overflow-hidden relative">
-            <img src="{{ asset('storage/' . $item->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            <div class="absolute top-2 right-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                <button type="button" onclick="openEditPortfolioModal('{{ $item->id }}', '{{ $item->category_id }}')" class="w-8 h-8 bg-white/90 rounded-full text-blue-500 shadow-lg flex items-center justify-center mb-1">
-                    <i class="fa-solid fa-pen text-[10px]"></i>
+        
+        <!-- REVISI 2: Menggunakan Padding-Bottom Hack 100% untuk Mengunci Rasio 1:1 Sempurna di Tablet Jadul -->
+        <div class="w-full relative bg-slate-100 overflow-hidden" style="padding-bottom: 100% !important; height: 0 !important; position: relative !important;">
+            
+            <!-- Properti Absolute Diikat Kuat ke Sisi Atas Kiri Kotak Padding Hack -->
+            <img src="{{ asset('storage/' . $item->image_path) }}" 
+                 class="transition-transform duration-500"
+                 style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important;">
+            
+            <div class="absolute top-3 right-3 opacity-100 transition-opacity" style="z-index: 10;">
+                <button type="button" onclick="openEditPortfolioModal('{{ $item->id }}', '{{ $item->category_id }}')" class="w-10 h-10 bg-white text-blue-600 rounded-full shadow-md flex items-center justify-center mb-2 active:scale-95 transition-transform">
+                    <i class="fa-solid fa-pen text-sm"></i>
                 </button>
-                <button type="button" onclick="confirmDelete('{{ $item->id }}', 'Foto Galeri {{ $item->category->name }}', 'portfolio')" class="w-8 h-8 bg-white/90 rounded-full text-rose-500 shadow-lg flex items-center justify-center">
-                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                <button type="button" onclick="confirmDelete('{{ $item->id }}', 'Foto Galeri {{ $item->category->name }}', 'portfolio')" class="w-10 h-10 bg-white text-rose-500 rounded-full shadow-md flex items-center justify-center active:scale-95 transition-transform">
+                    <i class="fa-solid fa-trash-can text-sm"></i>
                 </button>
             </div>
         </div>
+        
         <div class="p-4 text-center md:text-left">
-            <h4 class="font-black text-gray-900 uppercase italic text-[10px] md:text-xs truncate leading-none">{{ $item->category->name }}</h4>
+            <h4 class="font-black text-gray-800 uppercase italic text-xs truncate leading-none">{{ $item->category->name }}</h4>
         </div>
     </div>
     @endforeach
