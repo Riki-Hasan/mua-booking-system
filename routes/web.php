@@ -28,6 +28,7 @@ Route::get('/booking/calendar/{category_id}', [BookingController::class, 'calend
 // --- SISTEM PEMBAYARAN MIDTRANS ---
 // Ringkasan Pembayaran
 Route::get('/booking/{id}/summary', [PaymentController::class, 'summary'])->name('payment.summary');
+Route::post('/payment/qris-direct', [PaymentController::class, 'getQrisDirect'])->name('payment.qris_direct');
 
 // Ambil Token Snap (Pastikan nama route ini sesuai dengan yang dipanggil di JavaScript)
 Route::post('/payment/token', [PaymentController::class, 'getToken'])->name('payment.token');

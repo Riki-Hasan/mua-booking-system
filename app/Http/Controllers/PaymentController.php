@@ -167,4 +167,74 @@ class PaymentController extends Controller
 
         return response()->json(['status' => 'success']);
     }
+
+    public function getQrisDirect(Request $request)
+    {
+        try {
+            $booking = Booking::findOrFail($request->booking_id);
+
+            if ($booking->status !== 'pending') {
+                return response()->json(['status' => 'error', 'message' => 'Pesanan sudah diproses.'], 403);
+            }
+
+            $amount = ($request->type == 'dp') ? $booking->dp_amount : $booking->total_amount;
+            $serverKey = env('MIDTRANS_SERVER_KEY');
+            $url = "https://api.sandbox.midtrans.com/v2/charge";
+
+            // Format Order ID agar dikenali saat callback belakang layar
+            $orderId = 'MUA-' . $request->type . '-' . $booking->id . '-' . time();
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); 
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Accept: application/json',
+                'Authorization: Basic ' . base64_encode($serverKey . ':')
+            ));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+                'payment_type' => 'gopay', 
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => (int)$amount
+                ]
+            ]));
+
+            $response = curl_exec($ch);
+            $err = curl_error($ch);
+            curl_close($ch);
+
+            if ($err) {
+                return response()->json(['status' => 'error', 'message' => 'CURL Error: ' . $err], 500);
+            }
+
+            $result = json_decode($response);
+            
+            // Cari URL QR Code dari response Midtrans
+            $qrUrl = '';
+            if (isset($result->actions)) {
+                foreach ($result->actions as $action) {
+                    if ($action->name == 'generate-qr-code-v2') {
+                        $qrUrl = $action->url;
+                        break;
+                    }
+                }
+            }
+
+            if ($qrUrl) {
+                return response()->json([
+                    'status' => 'success',
+                    'qr_url' => $qrUrl,
+                    'order_id' => $orderId
+                ]);
+            }
+
+            return response()->json(['status' => 'error', 'message' => 'Gagal membuat QRIS dari Midtrans.'], 500);
+
+        } catch (Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }
